@@ -509,9 +509,20 @@ section[id],div[id]{scroll-margin-top:92px}
 .chip-2{bottom:-5%;right:-8%;animation:chipBob 6.5s ease-in-out infinite .6s}
 @keyframes chipBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
 
+/* Glossy 3D capsule — on-brand medical motif, floats behind the card */
+.capsule{position:absolute;z-index:3;width:84px;height:198px;border-radius:42px;left:-13%;bottom:-13%;transform:rotate(32deg);
+  background:linear-gradient(155deg,#ffffff 0%,#E7F2F2 100%);
+  box-shadow:0 34px 64px rgba(10,26,42,.30),inset 0 2px 6px rgba(255,255,255,.9),inset 0 -12px 26px rgba(10,26,42,.07);
+  animation:capFloat 8.5s ease-in-out infinite}
+.capsule::before{content:"";position:absolute;left:0;right:0;top:0;height:50%;border-radius:48px 48px 6px 6px;
+  background:linear-gradient(155deg,var(--mint) 0%,var(--teal) 65%,var(--teal-600) 100%);box-shadow:inset 0 -3px 10px rgba(0,0,0,.14)}
+.capsule::after{content:"";position:absolute;top:9%;left:23%;width:18px;height:78%;border-radius:30px;
+  background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.04));filter:blur(1.5px)}
+@keyframes capFloat{0%,100%{transform:rotate(32deg) translateY(0)}50%{transform:rotate(32deg) translateY(-18px)}}
+
 @media(max-width:820px){
   .hero-visual{min-height:auto;perspective:none}
-  .hero-orbit,.chip{display:none}
+  .hero-orbit,.chip,.capsule{display:none}
   .float{animation:none}
 }
 
@@ -592,6 +603,15 @@ document.addEventListener('DOMContentLoaded',function(){
         el.style.transform='';
       });
     });
+
+    // Subtle scroll parallax on the hero orb layer
+    var orbLayers=document.querySelectorAll('.orbs');
+    if(orbLayers.length){
+      window.addEventListener('scroll',function(){
+        var y=window.scrollY;
+        orbLayers.forEach(function(w){w.style.transform='translateY('+(y*0.12).toFixed(1)+'px)';});
+      },{passive:true});
+    }
   }
 });
 </script>
@@ -978,6 +998,7 @@ def build_home():
         <div class="hero-stage float">
           <div class="hero-orbit o1"><span class="node"></span></div>
           <div class="hero-orbit o2"><span class="node"></span></div>
+          <div class="capsule" aria-hidden="true"></div>
           <span class="chip chip-1"><span class="d" style="background:linear-gradient(150deg,var(--teal),var(--mint))">{icon('video',16)}</span> Same-day visits</span>
           <span class="chip chip-2"><span class="d" style="background:linear-gradient(150deg,var(--copper),var(--copper-2))">{icon('shield',16)}</span> 100% physician-led</span>
           <div class="hero-card tilt">
