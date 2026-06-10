@@ -1,0 +1,46 @@
+# Netlify config for mensmetabolic.com
+#
+# This site lives in the mensmetabolic/ subfolder of the repo. In the Netlify
+# UI (Site configuration > Build & deploy), set the **Base directory** to
+# "mensmetabolic". Netlify then reads this file and runs the build below
+# relative to that base. Forms (visit-request, eligibility-quiz) are detected
+# automatically from forms.html at build time.
+
+[build]
+  command = "python3 src/build.py"
+  publish = "dist"
+
+# Canonicalize the bare index file.
+[[redirects]]
+  from = "/index.html"
+  to = "/"
+  status = 301
+  force = true
+
+# Security headers, applied to every response.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+    X-XSS-Protection = "1; mode=block"
+
+# Long-cache immutable static assets (images, icons).
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/favicon.svg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# HTML should always revalidate so content updates ship immediately.
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
