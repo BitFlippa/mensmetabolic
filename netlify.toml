@@ -1,10 +1,18 @@
 # Netlify config for mensmetabolic.com
 #
-# This site lives in the mensmetabolic/ subfolder of the repo. In the Netlify
-# UI (Site configuration > Build & deploy), set the **Base directory** to
-# "mensmetabolic". Netlify then reads this file and runs the build below
-# relative to that base. Forms (visit-request, eligibility-quiz) are detected
-# automatically from forms.html at build time.
+# This repo IS the site root, so leave the Netlify **Base directory** blank
+# (Site configuration > Build & deploy > Build settings). Netlify reads this
+# file from the root and runs the build below. The build command and publish
+# directory here are authoritative, so you don't need to set them in the UI.
+# Forms (visit-request, eligibility-quiz) are detected automatically from
+# forms.html at build time.
+#
+# Custom domain: add mensmetabolic.com + www in Site configuration > Domain
+# management, set www.mensmetabolic.com as the primary domain (matches
+# BASE_URL in src/build.py), and Netlify will 301-redirect the apex to www
+# and provision HTTPS automatically. If you'd rather make the apex primary,
+# change BASE_URL in src/build.py to https://mensmetabolic.com and rebuild so
+# canonicals/sitemap/OG tags stay in sync.
 
 [build]
   command = "python3 src/build.py"
