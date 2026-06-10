@@ -447,6 +447,74 @@ section[id],div[id]{scroll-margin-top:92px}
   .trust-strip>div+div::before{display:none}
 }
 
+/* ════════════════ SENIOR POLISH — 3D · GRADIENTS · MOTION ════════════════ */
+
+/* Animated gradient mesh — gently drifts on hero + interior heroes */
+.hero,.page-hero{background-size:160% 160%;animation:meshDrift 26s ease-in-out infinite}
+@keyframes meshDrift{0%,100%{background-position:0% 0%}50%{background-position:100% 60%}}
+
+/* Decorative gradient orbs (blurred, floating, behind content) */
+.orbs{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.orb{position:absolute;border-radius:50%;filter:blur(64px);opacity:.55;will-change:transform}
+.orb-a{width:540px;height:540px;background:radial-gradient(circle at 32% 30%,#23C0A6,transparent 70%);top:-200px;right:-120px;animation:orbFloatA 19s ease-in-out infinite}
+.orb-b{width:440px;height:440px;background:radial-gradient(circle at 32% 30%,#0E7C86,transparent 70%);bottom:-180px;left:-120px;animation:orbFloatB 23s ease-in-out infinite}
+.orb-c{width:320px;height:320px;background:radial-gradient(circle at 32% 30%,#BE844A,transparent 72%);top:38%;left:54%;opacity:.32;animation:orbFloatC 27s ease-in-out infinite}
+@keyframes orbFloatA{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-46px,42px) scale(1.09)}}
+@keyframes orbFloatB{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(44px,-34px) scale(1.12)}}
+@keyframes orbFloatC{0%,100%{transform:translate(0,0)}50%{transform:translate(-30px,-44px)}}
+.hero,.page-hero,.section-teal,.cta-band{isolation:isolate}
+
+/* 3D perspective on card groups + pointer-driven tilt (JS sets --rx/--ry) */
+.grid,.cond-cats,.price-grid,.steps{perspective:1200px}
+.tilt{transition:transform .5s cubic-bezier(.16,1,.3,1),box-shadow .5s cubic-bezier(.16,1,.3,1);will-change:transform}
+.tilt.tilting{transition:transform .12s ease-out}
+.tilt:hover{box-shadow:var(--shadow-xl),0 0 0 1px color-mix(in srgb,var(--teal) 26%,transparent)}
+
+/* Shine sweep across cards on hover (not price cards — their ribbon overhangs) */
+.card,.cond-cat{position:relative;overflow:hidden}
+.card::after,.cond-cat::after{content:"";position:absolute;top:0;left:-130%;width:75%;height:100%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.5),transparent);transform:skewX(-18deg);
+  transition:left .8s cubic-bezier(.16,1,.3,1);pointer-events:none;z-index:3}
+.card:hover::after,.cond-cat:hover::after{left:135%}
+
+/* Button shimmer */
+.btn-primary,.btn-dark,.btn-light{position:relative;overflow:hidden}
+.btn-primary::after,.btn-dark::after,.btn-light::after{content:"";position:absolute;top:0;left:-140%;width:55%;height:100%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.4),transparent);transform:skewX(-18deg);transition:left .7s cubic-bezier(.16,1,.3,1)}
+.btn-primary:hover::after,.btn-dark:hover::after,.btn-light:hover::after{left:150%}
+
+/* Gradient headline accent */
+.grad-text{background:linear-gradient(100deg,var(--teal) 0%,var(--mint) 55%,var(--copper) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* ── HERO 3D SCENE ── */
+.hero-visual{position:relative;perspective:1300px;min-height:480px;display:flex;align-items:center;justify-content:center}
+.hero-stage{position:relative;width:100%;transform-style:preserve-3d}
+.hero-orbit{position:absolute;top:50%;left:50%;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:1}
+.hero-orbit.o1{width:470px;height:470px;border:1.5px solid color-mix(in srgb,var(--teal) 30%,transparent);animation:orbitSpin 30s linear infinite}
+.hero-orbit.o2{width:560px;height:560px;border:1.5px dashed color-mix(in srgb,var(--copper) 30%,transparent);animation:orbitSpin 46s linear infinite reverse}
+.hero-orbit .node{position:absolute;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 32% 30%,#7FF0DC,var(--teal));box-shadow:0 0 20px var(--mint);top:-8px;left:calc(50% - 8px)}
+.hero-orbit.o2 .node{background:radial-gradient(circle at 32% 30%,#F0CFA0,var(--copper));box-shadow:0 0 18px var(--copper-soft)}
+@keyframes orbitSpin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.hero-card{position:relative;z-index:2}
+.float{animation:cardFloat 7s ease-in-out infinite}
+@keyframes cardFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+
+/* Floating glass chips around the hero card */
+.chip{position:absolute;z-index:3;background:rgba(255,255,255,.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid var(--line);border-radius:15px;padding:11px 15px;box-shadow:var(--shadow-lg);
+  display:flex;align-items:center;gap:10px;font-size:.86rem;font-weight:650;color:var(--ink);white-space:nowrap}
+.chip .d{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0}
+.chip-1{top:-6%;left:-9%;animation:chipBob 6s ease-in-out infinite}
+.chip-2{bottom:-5%;right:-8%;animation:chipBob 6.5s ease-in-out infinite .6s}
+@keyframes chipBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+
+@media(max-width:820px){
+  .hero-visual{min-height:auto;perspective:none}
+  .hero-orbit,.chip{display:none}
+  .float{animation:none}
+}
+
 /* ── ACCESSIBILITY / POLISH ── */
 ::selection{background:var(--mint);color:#04372f}
 a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,
@@ -505,6 +573,25 @@ document.addEventListener('DOMContentLoaded',function(){
       entries.forEach(function(en){if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}});
     },{rootMargin:'0px 0px -8% 0px',threshold:.08});
     items.forEach(function(el){io.observe(el);});
+  }
+
+  // Pointer-driven 3D tilt — only on fine pointers, never under reduced motion
+  var finePointer=window.matchMedia&&window.matchMedia('(pointer: fine)').matches;
+  if(!reduce&&finePointer){
+    document.querySelectorAll('.card,.cond-cat,.price-card').forEach(function(el){el.classList.add('tilt');});
+    document.querySelectorAll('.tilt').forEach(function(el){
+      var max=7; // degrees
+      el.addEventListener('pointermove',function(e){
+        var r=el.getBoundingClientRect();
+        var px=(e.clientX-r.left)/r.width-0.5, py=(e.clientY-r.top)/r.height-0.5;
+        el.classList.add('tilting');
+        el.style.transform='perspective(900px) rotateX('+(-py*max).toFixed(2)+'deg) rotateY('+(px*max).toFixed(2)+'deg)';
+      });
+      el.addEventListener('pointerleave',function(){
+        el.classList.remove('tilting');
+        el.style.transform='';
+      });
+    });
   }
 });
 </script>
@@ -870,6 +957,7 @@ def build_home():
     html += render_nav()
     html += f"""
 <section class="hero">
+  <div class="orbs"><span class="orb orb-a"></span><span class="orb orb-b"></span><span class="orb orb-c"></span></div>
   <div class="container">
     <div class="hero-grid">
       <div>
@@ -886,18 +974,26 @@ def build_home():
           <span>{icon('check',18)} HSA/FSA eligible</span>
         </div>
       </div>
-      <div class="hero-card">
-        <span class="price-pop">Flat ${PRICE_VISIT} / visit</span>
-        <h3>A video visit includes</h3>
-        <p class="muted">Unhurried time with a physician who listens.</p>
-        <ul class="checklist">
-          <li><span class="ck">{icon('check',13)}</span>A real conversation with a board-certified physician</li>
-          <li><span class="ck">{icon('check',13)}</span>Diagnosis and a clear plan in plain language</li>
-          <li><span class="ck">{icon('check',13)}</span>Prescriptions sent to your pharmacy when appropriate</li>
-          <li><span class="ck">{icon('check',13)}</span>Lab orders and results review</li>
-          <li><span class="ck">{icon('check',13)}</span>Secure follow-up messaging with your care team</li>
-        </ul>
-        <a href="{BOOKING_URL}" class="btn btn-primary btn-block">Book a Visit</a>
+      <div class="hero-visual scene">
+        <div class="hero-stage float">
+          <div class="hero-orbit o1"><span class="node"></span></div>
+          <div class="hero-orbit o2"><span class="node"></span></div>
+          <span class="chip chip-1"><span class="d" style="background:linear-gradient(150deg,var(--teal),var(--mint))">{icon('video',16)}</span> Same-day visits</span>
+          <span class="chip chip-2"><span class="d" style="background:linear-gradient(150deg,var(--copper),var(--copper-2))">{icon('shield',16)}</span> 100% physician-led</span>
+          <div class="hero-card tilt">
+            <span class="price-pop">Flat ${PRICE_VISIT} / visit</span>
+            <h3>A video visit includes</h3>
+            <p class="muted">Unhurried time with a physician who listens.</p>
+            <ul class="checklist">
+              <li><span class="ck">{icon('check',13)}</span>A real conversation with a board-certified physician</li>
+              <li><span class="ck">{icon('check',13)}</span>Diagnosis and a clear plan in plain language</li>
+              <li><span class="ck">{icon('check',13)}</span>Prescriptions sent to your pharmacy when appropriate</li>
+              <li><span class="ck">{icon('check',13)}</span>Lab orders and results review</li>
+              <li><span class="ck">{icon('check',13)}</span>Secure follow-up messaging with your care team</li>
+            </ul>
+            <a href="{BOOKING_URL}" class="btn btn-primary btn-block">Book a Visit</a>
+          </div>
+        </div>
       </div>
     </div>
   </div>
