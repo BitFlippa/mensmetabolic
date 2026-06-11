@@ -52,7 +52,7 @@ export default function Navbar() {
           </a>
           <a
             href="#get-started"
-            className="bg-[#1a1a1a] text-white text-xs lowercase tracking-wide rounded-full px-5 py-3 hover:bg-black hover:scale-[1.02] active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a1a1a] transition-all"
+            className="whitespace-nowrap bg-[#1a1a1a] text-white text-xs lowercase tracking-wide rounded-full px-5 py-3 hover:bg-black hover:scale-[1.02] active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a1a1a] transition-all"
           >
             get started <span aria-hidden="true">→</span>
           </a>

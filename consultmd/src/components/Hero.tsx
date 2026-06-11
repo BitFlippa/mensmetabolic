@@ -19,6 +19,8 @@ export default function Hero() {
     <section className="relative min-h-[110vh] sm:min-h-[140vh] w-full flex flex-col items-center justify-start overflow-hidden bg-bg-base">
       {/* Background video, blended into the #EDEEF5 base */}
       <div className="absolute top-[15vh] sm:top-[20vh] left-0 w-full h-[95vh] sm:h-[120vh] z-0 pointer-events-none">
+        {/* Soft atmosphere shown wherever the video hasn't painted */}
+        <div className="absolute inset-0 bg-[radial-gradient(55%_45%_at_28%_38%,rgba(159,255,0,0.20),transparent_70%),radial-gradient(45%_55%_at_74%_62%,rgba(26,26,26,0.07),transparent_72%),radial-gradient(70%_60%_at_50%_95%,rgba(159,255,0,0.10),transparent_75%)]" />
         <video
           autoPlay
           loop
@@ -37,12 +39,12 @@ export default function Hero() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="font-display font-medium tracking-[-0.02em] leading-[1.12] text-[2.1rem] sm:text-5xl lg:text-6xl xl:text-[4.25rem]"
+            className="font-display font-medium tracking-[-0.02em] leading-[1.12] text-[2.1rem] sm:text-[2.6rem] lg:text-[3.25rem] xl:text-[3.75rem]"
           >
             <span className="text-[#1a1a1a]">ConsultMD offers</span>{" "}
             <span className="text-[#8e8e8e]">online care</span>
             <br />
-            <span className="text-[#8e8e8e]">and prescriptions to help you manage</span>
+            <span className="text-[#8e8e8e]">and treatment to help you manage</span>
             <br />
             <span className="text-[#8e8e8e]">
               your <EyePill /> health and wellbeing.
