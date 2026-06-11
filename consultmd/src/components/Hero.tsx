@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { QuatrefoilMark } from "./Navbar";
+import { BrandMark, Wordmark } from "./Navbar";
 
 function InlinePill() {
   return (
@@ -23,8 +23,8 @@ function PhonePreview() {
     >
       <div className="w-full h-full rounded-[34px] bg-[#f3f3f7] overflow-hidden flex flex-col">
         <div className="flex items-center gap-2 px-5 pt-5 pb-3 text-ink">
-          <QuatrefoilMark size={16} />
-          <span className="text-[14.5px] font-bold">consultmd</span>
+          <BrandMark size={16} />
+          <Wordmark className="text-[14.5px]" />
         </div>
         <div className="flex-1 px-4 py-2 flex flex-col gap-3">
           <div className="self-end max-w-[78%] bg-ink-button text-white text-[13px] leading-[1.45] px-3.5 py-[11px] rounded-[18px_18px_6px_18px]">

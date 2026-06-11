@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="ConsultMD">
+  <defs>
+    <linearGradient id="f-tile" x1="0" y1="0" x2="0.5" y2="0.87">
+      <stop offset="0" stop-color="#c9e89a"/><stop offset="1" stop-color="#cfc9f2"/>
+    </linearGradient>
+    <radialGradient id="f-lobe" cx="0.5" cy="0.5" r="0.6" fx="0.34" fy="0.30">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="0.58" stop-color="#edeef2"/><stop offset="1" stop-color="#cccdd8"/>
+    </radialGradient>
+    <radialGradient id="f-center" cx="0.5" cy="0.5" r="0.6" fx="0.35" fy="0.30">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="0.55" stop-color="#f4f5f8"/><stop offset="1" stop-color="#d8d9e2"/>
+    </radialGradient>
+    <filter id="f-shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="#0f0f23" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#f-tile)"/>
+  <g filter="url(#f-shadow)" transform="translate(40 40) scale(0.733)">
+    <circle cx="120" cy="62" r="58" fill="url(#f-lobe)"/>
+    <circle cx="62" cy="120" r="58" fill="url(#f-lobe)"/>
+    <circle cx="178" cy="120" r="58" fill="url(#f-lobe)"/>
+    <circle cx="120" cy="178" r="58" fill="url(#f-lobe)"/>
+    <circle cx="120" cy="120" r="48" fill="url(#f-center)"/>
+  </g>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img" aria-label="ConsultMD mark (onyx)">
+  <defs>
+    <radialGradient id="k-lobe" cx="0.5" cy="0.5" r="0.6" fx="0.34" fy="0.30">
+      <stop offset="0" stop-color="#54545e"></stop><stop offset="0.58" stop-color="#1d1d23"></stop><stop offset="1" stop-color="#0a0a0f"></stop>
+    </radialGradient>
+    <radialGradient id="k-center" cx="0.5" cy="0.5" r="0.6" fx="0.35" fy="0.30">
+      <stop offset="0" stop-color="#5e5e68"></stop><stop offset="0.55" stop-color="#24242b"></stop><stop offset="1" stop-color="#141418"></stop>
+    </radialGradient>
+    <filter id="k-shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="14" stdDeviation="9" flood-color="#000000" flood-opacity="0.42"></feDropShadow>
+    </filter>
+  </defs>
+  <g filter="url(#k-shadow)">
+    <circle cx="120" cy="62" r="58" fill="url(#k-lobe)"></circle>
+    <circle cx="62" cy="120" r="58" fill="url(#k-lobe)"></circle>
+    <circle cx="178" cy="120" r="58" fill="url(#k-lobe)"></circle>
+    <circle cx="120" cy="178" r="58" fill="url(#k-lobe)"></circle>
+    <circle cx="120" cy="120" r="48" fill="url(#k-center)"></circle>
+  </g>
+</svg>

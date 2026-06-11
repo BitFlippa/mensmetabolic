@@ -3,15 +3,29 @@ import { AnimatePresence, motion } from "motion/react";
 
 const NAV_LINKS = ["services", "patient resources", "about us", "education center"];
 
-export function QuatrefoilMark({ size = 22 }: { size?: number }) {
+export function BrandMark({
+  size = 26,
+  variant = "gradient",
+}: {
+  size?: number;
+  variant?: "gradient" | "onyx" | "pearl";
+}) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <circle cx="12" cy="5" r="4" />
-      <circle cx="12" cy="19" r="4" />
-      <circle cx="5" cy="12" r="4" />
-      <circle cx="19" cy="12" r="4" />
-      <circle cx="12" cy="12" r="4.4" />
-    </svg>
+    <img
+      src={`/brand/mark-${variant}.svg`}
+      width={size}
+      height={size}
+      alt=""
+      aria-hidden="true"
+    />
+  );
+}
+
+export function Wordmark({ className = "" }: { className?: string }) {
+  return (
+    <span className={`font-bold tracking-[-0.035em] ${className}`}>
+      consultMD
+    </span>
   );
 }
 
@@ -24,9 +38,9 @@ export default function Navbar() {
         aria-label="Primary"
         className="max-w-[1320px] mx-auto flex items-center justify-between px-6 sm:px-12 py-5 md:py-[30px]"
       >
-        <a href="/" className="flex items-center gap-2.5 text-ink">
-          <QuatrefoilMark />
-          <span className="text-xl font-bold tracking-[-0.01em]">consultmd</span>
+        <a href="/" className="flex items-center gap-2 text-ink">
+          <BrandMark />
+          <Wordmark className="text-[21px]" />
         </a>
 
         <ul className="hidden md:flex items-center gap-8">
