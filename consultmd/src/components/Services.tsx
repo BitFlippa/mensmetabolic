@@ -162,9 +162,9 @@ export default function Services() {
               <p className="text-xs lowercase tracking-[0.2em] text-zinc-500 mb-4">
                 what we treat
               </p>
-              <h2 className="font-display font-medium tracking-[-0.02em] leading-[1.15] text-3xl sm:text-4xl lg:text-5xl max-w-3xl">
-                <span className="text-[#1a1a1a]">See a doctor from your phone</span>{" "}
-                <span className="text-[#8e8e8e]">
+              <h2 className="font-extrabold tracking-[-0.02em] leading-[1.15] text-3xl sm:text-4xl lg:text-5xl max-w-3xl">
+                <span className="text-ink">See a doctor from your phone</span>{" "}
+                <span className="text-[#a6a6ae]">
                   for the visits that fill most waiting rooms.
                 </span>
               </h2>
@@ -174,7 +174,7 @@ export default function Services() {
               {STATS.map(([value, label]) => (
                 <div key={label}>
                   <dt className="sr-only">{label}</dt>
-                  <dd className="font-display text-2xl md:text-3xl font-medium text-[#1a1a1a]">
+                  <dd className="text-2xl md:text-3xl font-bold text-ink">
                     {value}
                   </dd>
                   <dd className="mt-1 text-xs text-zinc-500 leading-relaxed">{label}</dd>
@@ -192,10 +192,10 @@ export default function Services() {
                   transition={{ duration: 0.5, delay: (i % 3) * 0.08 }}
                   className="group bg-white rounded-2xl border border-black/[0.05] p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
                 >
-                  <div className="w-11 h-11 rounded-full bg-bg-base text-[#1a1a1a] flex items-center justify-center group-hover:bg-brand-green transition-colors">
+                  <div className="w-11 h-11 rounded-full bg-bg-base text-ink flex items-center justify-center group-hover:bg-[#eef2e3] transition-colors">
                     {service.icon}
                   </div>
-                  <h3 className="mt-5 font-display text-lg font-medium lowercase tracking-tight text-[#1a1a1a]">
+                  <h3 className="mt-5 text-lg font-medium lowercase tracking-tight text-ink">
                     {service.title}
                   </h3>
                   <p className="mt-2 text-sm leading-relaxed text-zinc-500">
@@ -215,7 +215,7 @@ export default function Services() {
               <a
                 href="#get-started"
                 id="get-started"
-                className="inline-flex items-center justify-center bg-[#1a1a1a] text-white text-sm lowercase tracking-wide rounded-full px-7 py-3.5 hover:bg-black hover:scale-[1.02] active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a1a1a] transition-all"
+                className="inline-flex items-center justify-center bg-ink-button text-white text-sm lowercase tracking-wide rounded-full px-7 py-3.5 hover:bg-black hover:scale-[1.02] active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink transition-all"
               >
                 start a visit <span className="ml-2" aria-hidden="true">→</span>
               </a>
