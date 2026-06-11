@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img" aria-label="ConsultMD mark (pearl, for dark backgrounds)">
+  <defs>
+    <radialGradient id="w-lobe" cx="0.5" cy="0.5" r="0.6" fx="0.34" fy="0.30">
+      <stop offset="0" stop-color="#ffffff"></stop><stop offset="0.58" stop-color="#edeef2"></stop><stop offset="1" stop-color="#cccdd8"></stop>
+    </radialGradient>
+    <radialGradient id="w-center" cx="0.5" cy="0.5" r="0.6" fx="0.35" fy="0.30">
+      <stop offset="0" stop-color="#ffffff"></stop><stop offset="0.55" stop-color="#f4f5f8"></stop><stop offset="1" stop-color="#d8d9e2"></stop>
+    </radialGradient>
+    <filter id="w-shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="14" stdDeviation="10" flood-color="#0f0f23" flood-opacity="0.5"></feDropShadow>
+    </filter>
+  </defs>
+  <g filter="url(#w-shadow)">
+    <circle cx="120" cy="62" r="58" fill="url(#w-lobe)"></circle>
+    <circle cx="62" cy="120" r="58" fill="url(#w-lobe)"></circle>
+    <circle cx="178" cy="120" r="58" fill="url(#w-lobe)"></circle>
+    <circle cx="120" cy="178" r="58" fill="url(#w-lobe)"></circle>
+    <circle cx="120" cy="120" r="48" fill="url(#w-center)"></circle>
+  </g>
+</svg>

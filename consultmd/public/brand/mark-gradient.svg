@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img" aria-label="ConsultMD mark">
+  <defs>
+    <radialGradient id="q-top" cx="0.5" cy="0.5" r="0.6" fx="0.34" fy="0.30">
+      <stop offset="0" stop-color="#ffffff"></stop><stop offset="0.42" stop-color="#c4e68a"></stop><stop offset="1" stop-color="#92c05c"></stop>
+    </radialGradient>
+    <radialGradient id="q-left" cx="0.5" cy="0.5" r="0.6" fx="0.34" fy="0.30">
+      <stop offset="0" stop-color="#ffffff"></stop><stop offset="0.42" stop-color="#d8eab0"></stop><stop offset="1" stop-color="#aacd7a"></stop>
+    </radialGradient>
+    <radialGradient id="q-right" cx="0.5" cy="0.5" r="0.6" fx="0.34" fy="0.30">
+      <stop offset="0" stop-color="#ffffff"></stop><stop offset="0.42" stop-color="#cfc8f3"></stop><stop offset="1" stop-color="#a195d9"></stop>
+    </radialGradient>
+    <radialGradient id="q-bottom" cx="0.5" cy="0.5" r="0.6" fx="0.34" fy="0.30">
+      <stop offset="0" stop-color="#ffffff"></stop><stop offset="0.42" stop-color="#c4d8ee"></stop><stop offset="1" stop-color="#9bb4d9"></stop>
+    </radialGradient>
+    <radialGradient id="q-center" cx="0.5" cy="0.5" r="0.6" fx="0.35" fy="0.30">
+      <stop offset="0" stop-color="#ffffff"></stop><stop offset="0.55" stop-color="#eef1e7"></stop><stop offset="1" stop-color="#d2d8c8"></stop>
+    </radialGradient>
+    <filter id="q-shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="14" stdDeviation="9" flood-color="#4a5434" flood-opacity="0.34"></feDropShadow>
+    </filter>
+  </defs>
+  <g filter="url(#q-shadow)">
+    <circle cx="120" cy="62" r="58" fill="url(#q-top)"></circle>
+    <circle cx="62" cy="120" r="58" fill="url(#q-left)"></circle>
+    <circle cx="178" cy="120" r="58" fill="url(#q-right)"></circle>
+    <circle cx="120" cy="178" r="58" fill="url(#q-bottom)"></circle>
+    <circle cx="120" cy="120" r="48" fill="url(#q-center)"></circle>
+  </g>
+</svg>
