@@ -48,17 +48,6 @@ const SERVICES: Service[] = [
     ),
   },
   {
-    title: "mental health",
-    description:
-      "Care plans and prescriptions for anxiety, depression, insomnia, ADHD, and panic disorder, with discreet follow-up.",
-    icon: (
-      <Icon>
-        <path d="M9.5 3A6.5 6.5 0 0 0 3 9.5c0 1.7.6 3.2 1.7 4.4L4 21l4.4-1.5A6.5 6.5 0 1 0 9.5 3Z" />
-        <path d="M15 8.5a6.5 6.5 0 1 1-4.7 11" />
-      </Icon>
-    ),
-  },
-  {
     title: "dermatology",
     description:
       "Photo-based visits for acne, eczema, psoriasis, rashes, rosacea, hair loss, and other skin concerns.",
@@ -149,25 +138,13 @@ const SERVICES: Service[] = [
       </Icon>
     ),
   },
-  {
-    title: "pediatrics",
-    description:
-      "Care for common childhood illnesses for ages 1 and up, so you can skip the late-night urgent care trip.",
-    icon: (
-      <Icon>
-        <circle cx="12" cy="12" r="9" />
-        <path d="M9 10.5h.01M15 10.5h.01" />
-        <path d="M9 15s1 1.5 3 1.5 3-1.5 3-1.5" />
-      </Icon>
-    ),
-  },
 ];
 
 const STATS = [
   ["150+", "conditions treated online"],
   ["$39.99", "flat-fee visits, no insurance needed"],
   ["~15 min", "to a prescription at your pharmacy"],
-  ["365", "days a year, ages 1+"],
+  ["365", "days a year, no appointment"],
 ] as const;
 
 export default function Services() {
