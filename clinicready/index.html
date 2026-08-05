@@ -1,0 +1,1199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClinicReady — Clinical Workflow Simulator</title>
+<style>
+:root{
+  --bg:#0f1720; --panel:#ffffff; --ink:#1c2733; --muted:#5b6b7b; --line:#e2e8f0;
+  --brand:#0e7c86; --brand-d:#0a5a62; --accent:#3b7dd8; --good:#1f9d55; --warn:#b7791f;
+  --bad:#c0392b; --soft:#f3f6f9; --soft2:#eaf1f4; --chip:#eef4f7; --shadow:0 1px 3px rgba(16,32,48,.08),0 6px 24px rgba(16,32,48,.06);
+  --r:12px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--soft);line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0 0 .4em;line-height:1.25;font-weight:650}
+h1{font-size:1.5rem} h2{font-size:1.25rem} h3{font-size:1.05rem} h4{font-size:.95rem}
+p{margin:0 0 .8em}
+a{color:var(--brand)}
+button{font-family:inherit;font-size:.95rem;cursor:pointer;border:0;border-radius:10px;padding:.6em 1.05em;background:var(--brand);color:#fff;font-weight:600;transition:filter .12s,background .12s}
+button:hover{filter:brightness(1.05)}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+button.ghost:hover{background:var(--soft)}
+button.sub{background:var(--soft2);color:var(--brand-d)}
+button.sm{padding:.35em .7em;font-size:.85rem}
+button.danger{background:var(--bad)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+header.top{background:linear-gradient(120deg,var(--brand-d),var(--brand));color:#fff;box-shadow:var(--shadow);position:sticky;top:0;z-index:50}
+header.top .wrap{display:flex;align-items:center;gap:18px;height:60px}
+.logo{font-weight:750;font-size:1.15rem;letter-spacing:.2px;display:flex;align-items:center;gap:9px;color:#fff;text-decoration:none}
+.logo .dot{width:12px;height:12px;border-radius:3px;background:#8fe3d6;box-shadow:0 0 0 3px rgba(143,227,214,.25)}
+nav.main{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+nav.main button{background:rgba(255,255,255,.08);color:#eafcfa;font-weight:600;padding:.5em .9em}
+nav.main button.active{background:#fff;color:var(--brand-d)}
+.screen{display:none;padding:26px 0 60px}
+.screen.active{display:block;animation:fade .2s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
+.card+.card{margin-top:16px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:860px){.g2,.g3{grid-template-columns:1fr}}
+.muted{color:var(--muted)}
+.small{font-size:.85rem}
+.tag{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:.25em .6em;border-radius:999px}
+.tag.draft{background:#fdf1dc;color:#8a5a12}
+.tag.appr{background:#e3f6ea;color:#137a41}
+.tag.mode{background:var(--chip);color:var(--brand-d)}
+.banner{background:#fff8ec;border:1px solid #f2e0bd;color:#7a5a13;border-radius:10px;padding:.7em 1em;font-size:.9rem;display:flex;gap:.6em;align-items:flex-start}
+.banner.warn{background:#fdeeee;border-color:#f3cfcf;color:#8a2f26}
+.banner .i{font-weight:800}
+.pill{display:inline-flex;align-items:center;gap:.4em;background:var(--chip);border-radius:999px;padding:.3em .8em;font-size:.85rem;font-weight:600;color:var(--brand-d)}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:.35em 0;border-bottom:1px dashed var(--line);font-size:.92rem}
+.kv:last-child{border-bottom:0}
+.kv .k{color:var(--muted)}
+/* Start form */
+.opt-row{display:flex;gap:10px;flex-wrap:wrap}
+.opt{border:1px solid var(--line);border-radius:10px;padding:.7em 1em;background:#fff;cursor:pointer;flex:1;min-width:160px}
+.opt.sel{border-color:var(--brand);box-shadow:0 0 0 2px rgba(14,124,134,.15);background:var(--soft)}
+.opt b{display:block}
+.toggle{display:inline-flex;align-items:center;gap:.6em;cursor:pointer;user-select:none}
+.switch{width:44px;height:26px;border-radius:999px;background:#cdd7e0;position:relative;transition:background .15s}
+.switch::after{content:"";position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.toggle.on .switch{background:var(--brand)}
+.toggle.on .switch::after{left:21px}
+/* Encounter */
+.enc-head{background:#fff;border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:14px 18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;top:60px;z-index:40}
+.enc-head .who b{font-size:1.05rem}
+.timer{margin-left:auto;text-align:right;font-variant-numeric:tabular-nums}
+.timer .big{font-size:1.15rem;font-weight:700}
+.timer .over{color:var(--bad)}
+.enc-grid{display:grid;grid-template-columns:230px 1fr 320px;gap:16px;margin-top:16px}
+@media(max-width:1080px){.enc-grid{grid-template-columns:1fr}}
+.panelnav{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:8px;box-shadow:var(--shadow);align-self:start;position:sticky;top:150px;max-height:calc(100vh - 170px);overflow:auto}
+.panelnav button{display:flex;width:100%;justify-content:space-between;align-items:center;gap:8px;background:transparent;color:var(--ink);text-align:left;padding:.5em .6em;border-radius:8px;font-weight:600;font-size:.9rem}
+.panelnav button:hover{background:var(--soft)}
+.panelnav button.active{background:var(--soft2);color:var(--brand-d)}
+.panelnav .cnt{font-size:.72rem;background:var(--brand);color:#fff;border-radius:999px;min-width:20px;text-align:center;padding:1px 6px}
+.panelnav .cnt.zero{background:#d7dfe6;color:#5b6b7b}
+.stage{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);min-height:360px}
+.action{border:1px solid var(--line);border-radius:10px;padding:.8em 1em;margin:.55em 0;cursor:pointer;transition:border-color .12s,background .12s;background:#fff}
+.action:hover{border-color:#c3d2dc;background:#fbfdfe}
+.action.taken{border-color:var(--brand);background:var(--soft)}
+.action .lbl{font-weight:600;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.action .min{font-size:.75rem;color:var(--muted);white-space:nowrap;font-weight:600}
+.action .reveal{margin-top:.55em;padding:.6em .8em;background:#f6faf9;border-left:3px solid var(--brand);border-radius:6px;font-size:.92rem;color:#20323f}
+.action.err.taken{border-color:var(--bad);background:#fdf1f0}
+.action.err.taken .reveal{background:#fdeeee;border-left-color:var(--bad)}
+.hintbox{background:#eef6ff;border:1px solid #d3e6fb;color:#1f4f86;border-radius:8px;padding:.6em .8em;font-size:.88rem;margin-bottom:.6em}
+.rail{display:flex;flex-direction:column;gap:14px}
+.rail .card{padding:14px}
+.transcript{max-height:320px;overflow:auto}
+.tline{font-size:.85rem;padding:.4em 0;border-bottom:1px dashed var(--line)}
+.tline:last-child{border:0}
+.tline .a{font-weight:600}
+.tline .r{color:var(--muted)}
+.checklist li{font-size:.85rem;margin:.25em 0;list-style:none;padding-left:1.4em;position:relative}
+.checklist li::before{content:"○";position:absolute;left:0;color:var(--muted)}
+.checklist li.done::before{content:"✓";color:var(--good);font-weight:800}
+.checklist{padding:0;margin:.3em 0}
+/* Report */
+.score-hero{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.ring{--v:0;width:132px;height:132px;border-radius:50%;background:conic-gradient(var(--brand) calc(var(--v)*1%), #e6edf2 0);display:grid;place-items:center;flex:none}
+.ring .in{width:104px;height:104px;border-radius:50%;background:#fff;display:grid;place-items:center;text-align:center}
+.ring .in b{font-size:2rem;line-height:1}
+.dom{margin:.5em 0}
+.dom .bar{height:10px;border-radius:6px;background:#e9eef3;overflow:hidden;margin-top:3px}
+.dom .bar>i{display:block;height:100%;background:var(--brand);border-radius:6px}
+.dom .top{display:flex;justify-content:space-between;font-size:.9rem;font-weight:600}
+details.pt{border:1px solid var(--line);border-radius:8px;margin:.4em 0;padding:.2em .2em}
+details.pt>summary{cursor:pointer;padding:.5em .7em;font-weight:600;font-size:.9rem}
+details.pt .body{padding:.2em .9em .8em}
+.contrib{display:flex;justify-content:space-between;font-size:.86rem;padding:.2em 0;border-bottom:1px dotted var(--line)}
+.contrib .p{font-weight:700}
+.contrib .p.pos{color:var(--good)} .contrib .p.neg{color:var(--bad)} .contrib .p.miss{color:var(--warn)}
+.lessons li{margin:.3em 0}
+.walk{background:var(--soft);border-radius:10px;padding:14px 16px;font-size:.94rem}
+.modal-bg{position:fixed;inset:0;background:rgba(12,22,32,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:14px;max-width:640px;width:100%;padding:26px;box-shadow:0 20px 60px rgba(0,0,0,.3);max-height:90vh;overflow:auto}
+.hidden{display:none!important}
+.foot{color:var(--muted);font-size:.8rem;text-align:center;padding:30px 0}
+.badge-list{display:flex;gap:8px;flex-wrap:wrap;margin:.3em 0}
+.src{font-size:.85rem;padding:.5em .7em;background:var(--soft);border-radius:8px;margin:.35em 0}
+.src b{color:var(--brand-d)}
+.libcard{cursor:pointer}
+.libcard:hover{border-color:#bcd}
+.flagrow{font-size:.9rem;padding:.5em .7em;border-radius:8px;margin:.35em 0}
+.flagrow.miss{background:#fdeeee;border:1px solid #f3cfcf;color:#8a2f26}
+.flagrow.low{background:#fff7ea;border:1px solid #f0dcae;color:#7a5a13}
+.flagrow.good{background:#eef8f1;border:1px solid #cbe8d5;color:#1a6b3d}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="#" onclick="go('dashboard');return false"><span class="dot"></span>ClinicReady</a>
+  <nav class="main" id="nav">
+    <button data-nav="dashboard" class="active" onclick="go('dashboard')">Dashboard</button>
+    <button data-nav="start" onclick="go('start')">Start Simulation</button>
+    <button data-nav="library" onclick="go('library')">Case Library</button>
+    <button data-nav="settings" onclick="go('settings')">Settings</button>
+  </nav>
+</div></header>
+
+<main class="wrap">
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="screen active"></section>
+  <!-- START -->
+  <section id="start" class="screen"></section>
+  <!-- ENCOUNTER -->
+  <section id="encounter" class="screen"></section>
+  <!-- REPORT -->
+  <section id="report" class="screen"></section>
+  <!-- LIBRARY -->
+  <section id="library" class="screen"></section>
+  <!-- CASE REVIEW -->
+  <section id="review" class="screen"></section>
+  <!-- SETTINGS -->
+  <section id="settings" class="screen"></section>
+</main>
+
+<div class="foot wrap">ClinicReady · Phase 1 · Professional clinical simulation — not medical advice. Synthetic patients only.</div>
+
+<!-- Safety modal -->
+<div class="modal-bg" id="safetyModal">
+  <div class="modal">
+    <h2>Before you begin</h2>
+    <p>This platform is for <b>professional education and simulation only</b>. It is <b>not</b> a substitute for clinical judgment, institutional policy, or current medical references.</p>
+    <p><b>Do not enter any real patient information anywhere in this app.</b> Every patient here is synthetic.</p>
+    <p class="small muted">Cases are marked <span class="tag draft">Draft</span> until you review their clinical content and sources in the Case Library and mark them Approved. Guidelines change — verify sources against the current version before relying on any case.</p>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
+      <button onclick="acceptSafety()">I understand — continue</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   ClinicReady — Phase 1
+   Single-file, no server, no accounts. Everything runs locally.
+   Data model note: every clickable thing in an encounter is an
+   "action" with these short keys:
+     id  unique id
+     t   the label the physician sees
+     r   the reveal (patient response / finding / result)
+     m   minutes it costs against the appointment slot
+     a   award object, keyed by domain (points; may be negative for errors)
+     c   critical action? (its omission is highlighted in the report)
+     lv  low-value? (flagged as time spent for little clinical yield)
+   Single-select panels (problem, diagnosis, disposition, followup)
+   allow only one choice; multi panels allow many.
+   ============================================================ */
+
+/* ---- Scoring domains (sum to 100) ---- */
+const DOMAINS = [
+  {k:'sf',  t:'Patient safety & red-flag recognition', max:20},
+  {k:'hx',  t:'History & information gathering',        max:15},
+  {k:'rz',  t:'Clinical reasoning & differential',      max:15},
+  {k:'mg',  t:'Evidence-aligned management',            max:15},
+  {k:'dg',  t:'Appropriate diagnostic evaluation',      max:10},
+  {k:'ms',  t:'Medication safety',                      max:10},
+  {k:'co',  t:'Patient communication & education',      max:5},
+  {k:'doc', t:'Documentation quality',                  max:5},
+  {k:'dp',  t:'Disposition, follow-up & return precautions', max:5},
+];
+const DMAX = Object.fromEntries(DOMAINS.map(d=>[d.k,d.max]));
+const DNAME = Object.fromEntries(DOMAINS.map(d=>[d.k,d.t]));
+
+/* ---- Encounter panels, in clinical order ---- */
+const PANELS = [
+  {k:'chart',       t:'Pre-visit chart review',  hint:'Skim the outside records before you walk in — some gaps only show up here.'},
+  {k:'identity',    t:'Identity verification',   hint:'Confirm you have the right patient and pharmacy before anything else.'},
+  {k:'agenda',      t:'Chief complaint & agenda', hint:'Open-ended first, then negotiate the list. Short visits reward good agenda-setting.'},
+  {k:'hpi',         t:'History of present illness', hint:'Characterize the story; look for the feature that changes disposition.'},
+  {k:'meds',        t:'Medication reconciliation', hint:'What is actually taken, at what dose, and adherence — not the chart list.'},
+  {k:'allergies',   t:'Allergy verification',    hint:'Verify reactions before you prescribe anything.'},
+  {k:'history',     t:'PMH / PSH / FH / SH',     hint:'Risk factors here often decide the differential.'},
+  {k:'ros',         t:'Review of systems',       hint:'Targeted beats exhaustive in a timed visit.'},
+  {k:'preventive',  t:'Preventive care',         hint:'Fold screening and immunizations into the visit when appropriate.'},
+  {k:'vitals',      t:'Vital signs',             hint:'Interpret, do not just read.'},
+  {k:'exam',        t:'Focused examination',     hint:'Examine what your differential demands.'},
+  {k:'orders',      t:'Diagnostic orders',       hint:'Right test, right setting, right time. Over-testing costs the clock.'},
+  {k:'problem',     t:'Problem representation',  single:true, hint:'One accurate one-liner drives everything after it.'},
+  {k:'ddx',         t:'Differential diagnosis',  multi:true, hint:'Include the must-not-miss diagnosis even if unlikely.'},
+  {k:'redflags',    t:'Red-flag check',          multi:true, hint:'Select the red flags that are actually present today.'},
+  {k:'diagnosis',   t:'Working diagnosis',       single:true},
+  {k:'management',  t:'Management & treatment',  multi:true},
+  {k:'education',   t:'Patient education & shared decision'},
+  {k:'disposition', t:'Disposition',             single:true},
+  {k:'followup',    t:'Follow-up interval',      single:true},
+  {k:'precautions', t:'Return precautions',      multi:true},
+  {k:'documentation',t:'Documentation'},
+];
+const PMETA = Object.fromEntries(PANELS.map(p=>[p.k,p]));
+
+/* small helper to keep case data terse */
+function act(id,t,r,m,a,opt){return Object.assign({id,t,r,m:m||0,a:a||{}},opt||{});}
+
+/* ============================================================
+   CASE 1 — New-patient establishment, multimorbidity
+   ============================================================ */
+const CASE1 = {
+  id:'c1', title:'New-patient establishment: multimorbidity (HTN + T2DM)',
+  who:{name:'Robert Ellison (synthetic)', age:58, sex:'Male'},
+  reason:'New patient — establish care and refill medications',
+  slot:40, category:'Chronic disease / new patient',
+  draft:true,
+  objectives:[
+    'Set an agenda in a full new-patient visit and surface the patient’s hidden concerns.',
+    'Reconcile medications and uncover nonadherence (metformin stopped, statin self-discontinued).',
+    'Integrate overdue preventive care (colorectal screening, immunizations, diabetic eye/foot).',
+    'Manage HTN and T2DM to guideline targets, including a cardiovascular-benefit agent.',
+    'Recognize new exertional symptoms as a cardiovascular red flag and arrange timely evaluation.',
+    'Choose a safe follow-up interval and clear return precautions; document a problem-based plan.'
+  ],
+  guidelines:[
+    {name:'Standards of Care in Diabetes—2025', body:'American Diabetes Association', date:'Published Dec 2024 (Diabetes Care, Jan 2025)', note:'A1c targets, statin therapy, annual retinal & foot exam, urine albumin screening, CV-benefit agents (SGLT2i/GLP-1 RA).'},
+    {name:'2017 Guideline for the Prevention, Detection, Evaluation, and Management of High Blood Pressure in Adults', body:'ACC/AHA', date:'2017', note:'BP target <130/80 mmHg for most adults with diabetes/high CV risk.'},
+    {name:'Colorectal Cancer: Screening', body:'USPSTF', date:'2021', note:'Begin screening at age 45; several modalities acceptable.'},
+    {name:'Recommended Adult Immunization Schedule', body:'CDC / ACIP', date:'2025', note:'Influenza, Tdap, pneumococcal and zoster indications.'},
+  ],
+  behaviors:['Medication nonadherence (stopped metformin for GI upset; quit statin over a "memory" myth)','Competing complaints and a reluctantly disclosed concern (erectile dysfunction)','Chart-vs-patient discrepancy and cost-driven skipping of medications'],
+  actions:{
+    chart:[
+      act('c1_labs','Review outside labs (14 months ago)','A1c 8.1% (14 months ago); LDL 118; eGFR 72; last BMP normal. No urine albumin on file.',1,{hx:2},{c:true}),
+      act('c1_bp','Review prior clinic BP log','Documented BPs over the past year: 148/92, 152/90, 146/88 — uncontrolled.',1,{hx:1}),
+      act('c1_prev','Review health-maintenance / screening history','No colorectal screening ever documented. No diabetic eye exam in 2 years. No foot exam on file. Immunizations: no influenza this season; Tdap 12 years ago; no pneumococcal; no zoster.',1,{hx:1},{c:true}),
+      act('c1_hosp','Request full records from a 2009 appendectomy','Old operative note obtained; unremarkable and not relevant today.',3,{},{lv:true}),
+    ],
+    identity:[
+      act('c1_id','Verify identity (name + DOB) and confirm pharmacy','Identity confirmed; preferred pharmacy on file.',1,{sf:1},{c:true}),
+    ],
+    agenda:[
+      act('c1_open','Open-ended: "What brings you in, and what would you like to be sure we cover today?"','"Mostly I need my prescriptions refilled. Honestly I’ve also been really tired lately… and there’s a personal thing I’ve been meaning to ask about."',1,{co:2,hx:1},{c:true}),
+      act('c1_agenda','Set and negotiate the agenda; prioritize the list together','You agree to cover refills, the fatigue, and — after some rapport — he discloses an erectile-dysfunction concern. You flag preventive care to fold in.',1,{co:2},{c:true}),
+      act('c1_refill_first','Start writing refills before hearing the full agenda','Refills queued, but you have not yet heard the fatigue or ED concerns — premature closure.',1,{},{lv:true}),
+    ],
+    hpi:[
+      act('c1_fatigue','Characterize the fatigue (onset, pattern, red flags: weight loss, dyspnea)','Gradual over months. "I get winded going up the stairs at work now — didn’t used to." No fever, weight stable, sleeps ~6h, snores.',2,{hx:2,rz:1},{c:true}),
+      act('c1_ed','Sensitively explore the concern he hinted at','New erectile dysfunction over ~6 months, gradual, no morning erections. Embarrassed to raise it.',1,{hx:1,rz:1,co:1}),
+      act('c1_diet','Diet, activity, and glucose self-monitoring','Doesn’t check sugars. Diet "not great — a lot of fast food at work." Largely sedentary.',1,{hx:1}),
+    ],
+    meds:[
+      act('c1_medrec','Reconcile each medication: what he truly takes, doses, and adherence','Lisinopril most days. STOPPED metformin ~2 months ago — "it tore up my stomach." Never restarted atorvastatin — "I read online it causes memory problems, quit it 6 months ago."',3,{hx:3,ms:2},{c:true}),
+      act('c1_otc','Ask about OTCs, supplements, and ED remedies','Ibuprofen "a few times a week" for his knees; a GNC "testosterone booster"; occasional sildenafil from a friend without supervision.',1,{ms:2,hx:1},{c:true}),
+    ],
+    allergies:[
+      act('c1_allergy','Verify allergies and reactions','No known drug allergies.',1,{ms:1},{c:true}),
+    ],
+    history:[
+      act('c1_pmh','PMH / PSH','HTN ~8 years, T2DM ~5 years, appendectomy. No known coronary disease and never had a stress test.',1,{hx:1}),
+      act('c1_fh','Family history','Father had a myocardial infarction at 55. Mother has T2DM.',1,{hx:1,rz:1},{c:true}),
+      act('c1_sh','Social history: tobacco, alcohol, occupation, supports','Former smoker, quit 3 years ago (30 pack-years). Alcohol 2–3 beers most nights. Warehouse work. Married.',1,{hx:2},{c:true}),
+      act('c1_cost','Ask about cost/access barriers to medications','High-deductible plan; sometimes skips medications to save money — part of why he stopped some.',1,{co:1,hx:1}),
+    ],
+    ros:[
+      act('c1_ros_cv','Targeted cardiovascular / constitutional ROS','+ Exertional chest "tightness" and dyspnea with heavy exertion that resolves with rest — "I figured I was just out of shape." No rest pain, no syncope.',2,{sf:4,rz:2},{c:true}),
+      act('c1_ros_gu','GU / ED-related ROS','As above; nocturia once nightly. No hematuria.',1,{hx:1}),
+      act('c1_ros_full','Read the full 14-point ROS aloud','Long list, mostly negative; eats several minutes with little added yield today.',4,{hx:1},{lv:true}),
+    ],
+    preventive:[
+      act('c1_prev_crc','Address colorectal-cancer screening (overdue since age 45)','Never screened. Open to a stool-based test or colonoscopy once you explain the options.',1,{mg:2,co:1},{c:true}),
+      act('c1_prev_imm','Review and offer indicated immunizations','Agrees to influenza today; Tdap due; pneumococcal and zoster to be scheduled.',1,{mg:1},{c:true}),
+      act('c1_prev_eye','Refer for the overdue diabetic retinal exam','Referral placed for dilated eye exam.',1,{mg:1}),
+    ],
+    vitals:[
+      act('c1_vitals','Review and interpret today’s vitals','BP 150/94 (repeat 148/92), HR 78, BMI 33, SpO2 97%, point-of-care fingerstick 186 mg/dL.',1,{dg:1,rz:1},{c:true}),
+    ],
+    exam:[
+      act('c1_exam_cv','Cardiopulmonary exam','Normal S1/S2, no murmur or gallop; lungs clear; no peripheral edema.',2,{rz:1}),
+      act('c1_exam_feet','Diabetic foot exam (monofilament, pulses, skin)','Reduced monofilament sensation bilaterally; pulses intact; no ulcers — peripheral neuropathy.',2,{mg:2},{c:true}),
+      act('c1_exam_full','Head-to-toe complete exam on a stable patient','Thorough but time-intensive; adds little beyond the focused exam today.',4,{rz:1},{lv:true}),
+    ],
+    orders:[
+      act('c1_a1c','Point-of-care A1c','POC A1c 8.6% — above target; diabetes uncontrolled.',1,{dg:2},{c:true}),
+      act('c1_bmp','BMP / renal function with eGFR','eGFR 68, K 4.3, otherwise normal — safe to resume metformin; relevant to NSAID counseling.',1,{dg:2,ms:1},{c:true}),
+      act('c1_lipid','Lipid panel','LDL 132, HDL 38, TG 210 — off statin, at goal-missing levels.',1,{dg:1},{c:true}),
+      act('c1_acr','Urine albumin-to-creatinine ratio','ACR 45 mg/g — moderately increased albuminuria (supports ACEi + SGLT2i).',1,{dg:1,mg:1},{c:true}),
+      act('c1_ecg','In-office 12-lead ECG (given exertional symptoms)','Sinus rhythm, no acute ST changes; nonspecific. A normal resting ECG does not exclude coronary disease.',2,{sf:3,dg:1},{c:true}),
+      act('c1_cardeval','Arrange timely outpatient cardiac evaluation (stress test / cardiology) for the exertional symptoms','Referral placed and expedited; patient counseled on urgency and warning signs.',1,{sf:5},{c:true}),
+      act('c1_tsh','TSH (part of a fatigue work-up)','TSH pending — a reasonable, low-cost addition for new fatigue.',1,{dg:1}),
+      act('c1_testo','Morning total testosterone (for the ED concern)','Ordered — appropriate first step for ED work-up.',1,{dg:1}),
+      act('c1_ctchest','CT chest','No indication today; needless radiation and cost.',1,{},{lv:true}),
+      act('c1_psa','Order a PSA without any discussion','Screening PSA should be a shared decision, not a reflex order.',1,{},{lv:true}),
+    ],
+    problem:[
+      act('c1_pr_a','58-year-old man with poorly controlled T2DM and HTN, medication nonadherence and multiple preventive-care gaps, now with exertional dyspnea/chest tightness and new ED concerning for underlying cardiovascular disease.','A complete, accurate problem representation that keeps the cardiovascular concern front and center.',0,{rz:3},{c:true}),
+      act('c1_pr_b','58-year-old man here for routine medication refills.','Anchors on the scheduling reason and drops the active problems.',0,{}),
+      act('c1_pr_c','58-year-old man with fatigue, most likely from poor sleep.','Plausible but incomplete — misses the cardiometabolic picture.',0,{}),
+    ],
+    ddx:[
+      act('c1_ddx_angina','Stable angina / coronary artery disease','The must-not-miss diagnosis given exertional symptoms and risk factors.',0,{sf:3,rz:3},{c:true}),
+      act('c1_ddx_decon','Deconditioning / obesity','A reasonable contributor to exertional symptoms.',0,{rz:1}),
+      act('c1_ddx_anemia','Anemia','Reasonable to consider for fatigue and dyspnea.',0,{rz:1}),
+      act('c1_ddx_dm','Uncontrolled diabetes contributing to fatigue','Reasonable contributor.',0,{rz:1}),
+      act('c1_ddx_depr','Depression / sleep disorder','Reasonable to include for fatigue and ED.',0,{rz:1}),
+      act('c1_ddx_panic','Panic disorder (attributing symptoms to anxiety, no cardiac work-up)','Anchoring away from the cardiac concern.',0,{}),
+    ],
+    redflags:[
+      act('c1_rf_exert','Exertional chest tightness and dyspnea','Correctly identified — the central safety issue today.',0,{sf:4},{c:true}),
+      act('c1_rf_risk','Premature family history of CAD plus multiple risk factors','Correctly weighted.',0,{sf:1}),
+    ],
+    diagnosis:[
+      act('c1_dx_multi','Uncontrolled T2DM and HTN with new exertional symptoms requiring cardiovascular work-up','Captures the active problems and the safety issue.',0,{rz:2},{c:true}),
+      act('c1_dx_dm','Uncontrolled diabetes','Partly right but omits the cardiovascular concern.',0,{rz:1}),
+      act('c1_dx_stable','Stable chronic disease — refills only','Undershoots and ignores the exertional symptoms.',0,{}),
+    ],
+    management:[
+      act('c1_mg_metformin','Resume metformin after confirming eGFR; address GI upset (extended-release / retitrate)','Re-engages first-line therapy safely.',1,{mg:2,ms:1},{c:true}),
+      act('c1_mg_intensify','Add a CV-benefit agent per ADA (SGLT2i or GLP-1 RA), shared decision','Aligns with ADA 2025 given CV risk and albuminuria.',1,{mg:3},{c:true}),
+      act('c1_mg_statin','Re-engage statin therapy; address the "memory" myth with evidence','Corrects a nonadherence driver with counseling.',1,{mg:3,ms:1,co:1},{c:true}),
+      act('c1_mg_bp','Optimize BP toward <130/80 and reinforce adherence','Aligns with ACC/AHA 2017 targets.',1,{mg:2},{c:true}),
+      act('c1_mg_nsaid','Counsel to stop routine NSAIDs (renal + BP effects); offer an alternative','Reduces a real medication-safety risk.',1,{ms:2},{c:true}),
+      act('c1_mg_sild','Address the unsupervised sildenafil and testosterone booster (safety, nitrate caution pending CV work-up)','Important given the pending cardiac evaluation.',1,{ms:2,sf:1},{c:true}),
+      act('c1_mg_life','Lifestyle counseling: diet, activity, alcohol, staying quit from tobacco','Reasonable and high-yield over time.',1,{mg:1,co:1}),
+      act('c1_mg_testrx','Prescribe testosterone for ED today without any work-up','Premature and potentially unsafe before evaluation and labs.',1,{ms:-3},{lv:true,err:true}),
+    ],
+    education:[
+      act('c1_edu_teach','Teach-back on the medication changes and why adherence matters','He can restate the plan and the reasons.',1,{co:2},{c:true}),
+      act('c1_edu_edlink','Frame ED as a possible early vascular warning sign (motivational, non-shaming)','Reframes the concern as actionable and connected to his heart health.',1,{co:1}),
+    ],
+    disposition:[
+      act('c1_disp_fu','Continue outpatient management with close follow-up plus an expedited cardiac evaluation','The right call: outpatient is appropriate, but the exertional symptoms are actively worked up.',0,{dp:2,sf:2},{c:true}),
+      act('c1_disp_ed','Send him to the emergency department now','Over-triage — stable exertional symptoms without acute features do not need the ED today.',0,{}),
+      act('c1_disp_refill','Refill medications, routine 6-month follow-up, no further action','Ignores the exertional symptoms — an unsafe disposition.',0,{}),
+    ],
+    followup:[
+      act('c1_fu_short','Follow up in 2–4 weeks with labs reviewed sooner; sooner if symptoms change','Matches the medication changes and the pending cardiac work-up.',0,{dp:2},{c:true}),
+      act('c1_fu_3mo','Follow up in 3 months','Reasonable for stable diabetes, but too long given today’s changes and symptoms.',0,{dp:1}),
+      act('c1_fu_6mo','Follow up in 6 months','Too long given uncontrolled disease and new symptoms.',0,{}),
+    ],
+    precautions:[
+      act('c1_rp_card','Return / ER precautions for chest pain, rest symptoms, dyspnea, or diaphoresis','Directly tied to the cardiac concern.',1,{sf:2,dp:1},{c:true}),
+      act('c1_rp_gluc','Hypo- and hyperglycemia symptoms and when to call','Relevant to the medication changes.',1,{dp:1}),
+      act('c1_rp_contact','How to reach the clinic and the plan for pending results','Closes the loop on results.',1,{dp:1}),
+    ],
+    documentation:[
+      act('c1_doc_ap','Document a problem-based assessment & plan with the reasoning for the cardiac work-up','Supports continuity and medicolegal needs.',1,{doc:2},{c:true}),
+      act('c1_doc_med','Document the reconciled medication list, adherence, and changes made','Essential in a new-patient visit.',1,{doc:1},{c:true}),
+      act('c1_doc_prev','Document preventive care addressed and ordered','Captures the screening/immunization work.',1,{doc:1}),
+      act('c1_doc_rp','Document counseling and return precautions','Closes the visit safely.',1,{doc:1}),
+    ],
+  },
+  safety:[
+    {when:'selected', id:'c1_disp_refill', cap:55, risk:'Refilling and dispositioning to routine follow-up ignores new exertional chest tightness and dyspnea in a high-cardiovascular-risk patient — a potentially missed presentation of coronary disease.'},
+    {when:'omitted',  id:'c1_cardeval',    cap:65, risk:'Exertional chest tightness and dyspnea in a 58-year-old with premature family history and multiple risk factors warrant a timely cardiac evaluation. Omitting it risks missing significant coronary disease.'},
+  ],
+  walkthrough:'Open-ended, then negotiate a realistic agenda for a 40-minute new-patient slot — surfacing the fatigue and the ED concern he was reluctant to raise. Reconciliation is the pivot: he stopped metformin for GI intolerance and quit his statin over an online "memory" myth, and he takes unsupervised sildenafil plus an OTC testosterone booster with routine NSAIDs. The highest-stakes thread is his exertional chest tightness and dyspnea with new ED — a possible early sign of coronary disease — so a resting ECG plus an expedited cardiac evaluation belong in the plan even though outpatient management is otherwise appropriate. Fold in the overdue colorectal screening, immunizations, and diabetic eye/foot care; resume metformin after checking renal function, re-engage a statin, add a cardiovascular-benefit agent (SGLT2i or GLP-1 RA) given albuminuria, and push BP toward <130/80. Close with teach-back, cardiac and glycemic return precautions, a 2–4 week follow-up, and a problem-based note.',
+  lessons:[
+    'Reconciliation means what the patient actually takes and why they stopped — not the chart list.',
+    'A "refill visit" reason for scheduling does not license a refill-only plan when new symptoms are present.',
+    'Preventive care is part of the visit, not an afterthought — bundle screening and immunizations while you have them.'
+  ],
+  nextgoal:'On your next case, write the problem representation before choosing management and check that every active problem — especially the safety one — appears in it.'
+};
+
+/* ============================================================
+   CASE 2 — Undifferentiated chest pain requiring escalation
+   ============================================================ */
+const CASE2 = {
+  id:'c2', title:'Chest discomfort: an undifferentiated complaint hiding a red flag',
+  who:{name:'Marcus Whitfield (synthetic)', age:52, sex:'Male'},
+  reason:'"Chest discomfort for a couple of days" — squeezed into a short slot',
+  slot:20, category:'Acute / red-flag recognition',
+  draft:true,
+  objectives:[
+    'Take a focused cardiac history under time pressure and recognize an emergent pattern.',
+    'Identify the red flags that make outpatient management inappropriate.',
+    'Deliver time-critical care: aspirin (allergy checked), in-office ECG, monitoring.',
+    'Arrange a safe disposition — emergency transport, not self-transport or a GERD trial.',
+    'Communicate urgency respectfully while addressing the patient’s cost/time concerns.',
+  ],
+  guidelines:[
+    {name:'2021 Guideline for the Evaluation and Diagnosis of Chest Pain', body:'AHA/ACC (Gulati et al., Circulation)', date:'2021', note:'"Chest pain means heart pain until proven otherwise"; aspirin and EMS activation for suspected ACS; risk-stratified pathways.'},
+  ],
+  behaviors:['Symptom minimization ("probably just heartburn, I have a busy day")','Cost/time resistance to going to the emergency department','Requests a quick fix instead of an emergency evaluation'],
+  actions:{
+    chart:[
+      act('c2_chart_pmh','Review problem list and prior notes','HTN and hyperlipidemia on file; current smoker; no prior cardiac work-up.',1,{hx:1},{c:true}),
+      act('c2_chart_med','Review medication list','Amlodipine and atorvastatin on file; no anticoagulant; no nitrates or PDE5 inhibitors listed.',1,{hx:1,ms:1}),
+      act('c2_chart_old','Pull a 5-year-old dermatology note','Not relevant; consumes time you do not have in a 20-minute slot.',2,{},{lv:true}),
+    ],
+    identity:[ act('c2_id','Verify identity','Identity confirmed.',1,{sf:1},{c:true}) ],
+    agenda:[
+      act('c2_open','Open-ended: "What’s going on today?"','"Chest pressure, on and off for two days, worse today. Probably heartburn — my wife made me come. I’ve got a busy day, can you just give me something?"',1,{co:1,hx:1},{c:true}),
+    ],
+    hpi:[
+      act('c2_char','Characterize the discomfort (OPQRST)','Central pressure, "like a weight," 6/10, brought on by walking in and climbing stairs, eases with rest after ~10 minutes. Began two days ago; more frequent today.',2,{hx:2,sf:3,rz:2},{c:true}),
+      act('c2_assoc','Associated symptoms (radiation, dyspnea, diaphoresis, nausea)','Radiates to the left arm; one episode of sweating and nausea this morning; mild breathlessness.',1,{hx:1,sf:4,rz:2},{c:true}),
+      act('c2_gerd','Compare against reflux features','"I get heartburn sometimes, but this feels different — higher, heavier, and it’s not related to meals."',1,{hx:1,rz:1}),
+    ],
+    meds:[
+      act('c2_medrec','Reconcile meds, adherence, and any nitrates / PDE5 inhibitor / anticoagulant','Takes amlodipine; stopped his statin months ago. No nitrates or PDE5 inhibitors. Took a friend’s antacid today with no relief.',1,{hx:1,ms:1},{c:true}),
+    ],
+    allergies:[
+      act('c2_allergy','Verify allergies before giving aspirin or any medication','No known allergies; has taken aspirin before without problems.',1,{ms:2},{c:true}),
+    ],
+    history:[
+      act('c2_fh','Cardiac risk factors and family history','Father had a CABG at 58. Smokes one pack a day for 30 years. No regular exercise.',1,{hx:1,sf:1,rz:1},{c:true}),
+      act('c2_sh','Occupation and stressors','Drives a delivery route; under work stress lately.',1,{hx:1}),
+    ],
+    ros:[
+      act('c2_ros','Focused cardiopulmonary ROS','No fever, cough, calf pain/swelling, or recent immobilization; mild exertional breathlessness.',1,{hx:1,rz:1}),
+    ],
+    vitals:[
+      act('c2_vitals','Obtain and interpret vitals','BP 158/96 in both arms, HR 96, RR 18, SpO2 96%, afebrile.',1,{sf:2,dg:1},{c:true}),
+    ],
+    exam:[
+      act('c2_exam_cv','Cardiopulmonary and perfusion exam','Anxious and diaphoretic-appearing; heart sounds normal, no murmur; lungs clear; no edema; pulses equal.',2,{rz:1,sf:1}),
+      act('c2_exam_gi','Focus only on the abdomen to chase a GI cause','Mild epigastric tenderness — a distractor that risks anchoring on reflux.',1,{},{lv:true}),
+    ],
+    orders:[
+      act('c2_ecg','Obtain a 12-lead ECG now','ST-segment depressions in the lateral leads — ischemic changes.',2,{sf:5,dg:3},{c:true}),
+      act('c2_cxr','Portable chest X-ray as an adjunct','No widened mediastinum, no acute process — reasonable adjunct, lower priority.',1,{dg:1}),
+      act('c2_trop_out','Send an outpatient troponin with results tomorrow','Relying on a next-day result for active symptoms dangerously delays care.',1,{},{lv:true}),
+      act('c2_cta_out','Order an outpatient coronary CT for next week','Wrong setting and timing for an acute presentation.',1,{},{lv:true}),
+    ],
+    problem:[
+      act('c2_pr_a','52-year-old man with multiple risk factors and two days of crescendo exertional chest pressure with radiation, diaphoresis, and ischemic ECG changes — an acute coronary syndrome until proven otherwise.','The accurate, action-driving one-liner.',0,{rz:3,sf:2},{c:true}),
+      act('c2_pr_b','Likely GERD, given his heartburn history.','Anchoring on a benign cause despite red flags.',0,{}),
+      act('c2_pr_c','Musculoskeletal chest wall pain.','Ignores the exertional pattern and ECG.',0,{}),
+    ],
+    ddx:[
+      act('c2_ddx_acs','Acute coronary syndrome / unstable angina','The must-not-miss diagnosis.',0,{sf:4,rz:3},{c:true}),
+      act('c2_ddx_pe','Pulmonary embolism','Reasonable to consider and exclude.',0,{rz:1}),
+      act('c2_ddx_aortic','Aortic dissection','Reasonable to consider given the presentation.',0,{rz:1}),
+      act('c2_ddx_gerd','GERD (less likely — do not anchor)','Fine to keep low on the list.',0,{rz:1}),
+      act('c2_ddx_anx','Anxiety alone, no cardiac cause','Anchoring away from the emergency.',0,{}),
+    ],
+    redflags:[
+      act('c2_rf_exert','Crescendo / exertional pattern','Correctly identified.',0,{sf:3},{c:true}),
+      act('c2_rf_rad','Radiation with diaphoresis and nausea','Correctly identified.',0,{sf:3},{c:true}),
+      act('c2_rf_ecg','Ischemic ECG changes','Correctly identified.',0,{sf:3},{c:true}),
+      act('c2_rf_vitals','Hypertensive and tachycardic','A supporting concern.',0,{sf:1}),
+    ],
+    diagnosis:[
+      act('c2_dx_acs','Presumed acute coronary syndrome — a medical emergency','Correct working diagnosis.',0,{rz:2,sf:2},{c:true}),
+      act('c2_dx_gerd','GERD','Unsafe anchoring.',0,{}),
+      act('c2_dx_costo','Costochondritis','Unsafe anchoring.',0,{}),
+    ],
+    management:[
+      act('c2_mg_asa','Give aspirin 324 mg chewed now (allergy confirmed absent)','Time-critical, mortality-reducing, and low-risk here.',1,{sf:4,mg:3,ms:2},{c:true}),
+      act('c2_mg_ems','Activate EMS / call 911 for emergency transport to the ED','The safe disposition path — monitored transport with early defibrillation available.',1,{sf:6,dp:2},{c:true}),
+      act('c2_mg_monitor','Keep him monitored with IV/oxygen as available and serial vitals while awaiting EMS','Appropriate stabilization in the interval.',1,{sf:2,mg:1}),
+      act('c2_mg_nitro','If considering nitroglycerin, confirm no PDE5 inhibitor use in 24–48h and an adequate blood pressure first','Correct medication-safety check.',1,{ms:2}),
+      act('c2_mg_ppi','Prescribe a PPI and trial GERD therapy','Masks a probable ACS and delays life-saving care.',1,{sf:-3},{lv:true,err:true}),
+    ],
+    education:[
+      act('c2_edu_risk','Clearly and non-judgmentally explain why this needs emergency evaluation now','Honest, respectful framing that supports the safe plan.',1,{co:2,sf:1},{c:true}),
+      act('c2_edu_cost','Acknowledge his cost and time concerns while holding the safe plan; help address barriers to going','Meets the patient where he is without compromising safety.',1,{co:2},{c:true}),
+      act('c2_edu_refuse','If he still wants to leave, discuss the risks plainly, document, and arrange the safest possible option','Handles refusal safely and defensibly.',1,{co:1,sf:1}),
+    ],
+    disposition:[
+      act('c2_disp_ems','Emergency department now via EMS','The correct, safe disposition.',0,{dp:2,sf:2},{c:true}),
+      act('c2_disp_drive','Have him drive himself to the ER','Risks cardiac arrest at the wheel — unsafe.',0,{}),
+      act('c2_disp_home','Discharge home with a GERD trial and outpatient follow-up','A life-threatening miss.',0,{}),
+      act('c2_disp_obs','Observe in the clinic and recheck later','Dangerously delays definitive care.',0,{}),
+    ],
+    followup:[
+      act('c2_fu_handoff','Give a warm handoff to the receiving ED and send records with him','The right "follow-up" for an emergency transfer.',0,{dp:2},{c:true}),
+      act('c2_fu_week','Schedule a routine follow-up next week','Inappropriate for an emergency.',0,{}),
+    ],
+    precautions:[
+      act('c2_rp_worsen','Instruct that if symptoms worsen or he collapses before EMS arrives, call 911 again; give the family basic guidance','Appropriate interim safety-netting.',1,{sf:2,dp:1},{c:true}),
+      act('c2_rp_written','Provide a written reason-for-transfer and what to tell the ED','Supports a safe transition of care.',1,{dp:1}),
+    ],
+    documentation:[
+      act('c2_doc_time','Document a time-stamped course: ECG, aspirin given, EMS activation, and the shared decision','Essential for a time-critical, medicolegally sensitive encounter.',1,{doc:3},{c:true}),
+      act('c2_doc_risk','Document the risk discussion and the patient’s response (especially any reluctance)','Protects the patient and the clinician.',1,{doc:2},{c:true}),
+    ],
+  },
+  safety:[
+    {when:'selected', id:'c2_disp_home', cap:30, risk:'Discharging a patient with crescendo exertional chest pressure, radiation, diaphoresis, and ischemic ECG changes is a life-threatening miss — this is an acute coronary syndrome until proven otherwise.'},
+    {when:'omitted',  id:'c2_mg_ems',   cap:35, risk:'Failing to activate emergency transport leaves a probable ACS patient without a timely, monitored path to reperfusion.'},
+    {when:'omitted',  id:'c2_mg_asa',   cap:60, risk:'Aspirin was not given to a probable ACS patient with no contraindication — a missed, time-critical, mortality-reducing intervention.'},
+    {when:'selected', id:'c2_disp_drive', cap:55, risk:'Advising self-transport risks cardiac arrest at the wheel; EMS provides monitoring and early defibrillation.'},
+    {when:'selected', id:'c2_disp_obs', cap:40, risk:'Observing in clinic delays definitive care for a time-critical emergency.'},
+  ],
+  walkthrough:'This looks like a "just squeeze me in" heartburn visit and is actually an emergency. A focused OPQRST history reveals crescendo, exertional central pressure with radiation to the left arm, a diaphoretic/nauseated episode, and mild dyspnea in a 52-year-old smoker with premature family history — chest pain is cardiac until proven otherwise. Vitals and an in-office ECG (lateral ST depressions) confirm the concern. The time-critical moves are aspirin after confirming no allergy, monitoring with IV/oxygen as available, and activating EMS for a monitored transfer — not a PPI trial, not self-driving, and not an outpatient troponin for tomorrow. The communication task is real: acknowledge his cost and time worries honestly while holding the safe plan, and if he resists, discuss the risk plainly and document. Give a warm handoff to the ED and clear interim precautions.',
+  lessons:[
+    'In a red-flag presentation, disposition safety outranks efficiency and patient convenience.',
+    'Aspirin plus EMS activation are the two moves that must not be missed in suspected ACS.',
+    'Naming the must-not-miss diagnosis out loud (ACS until proven otherwise) prevents anchoring on heartburn.'
+  ],
+  nextgoal:'On your next case, do the red-flag check before you commit to a disposition — let the red flags, not the schedule, decide the setting of care.'
+};
+
+/* ============================================================
+   CASE 3 — Viral URI with an antibiotic demand (stewardship)
+   ============================================================ */
+const CASE3 = {
+  id:'c3', title:'Acute upper-respiratory illness with an antibiotic request',
+  who:{name:'Danielle Brooks (synthetic)', age:34, sex:'Female'},
+  reason:'"Cold / sinus infection" — wants antibiotics before a trip',
+  slot:15, category:'Acute / communication & stewardship',
+  draft:true,
+  objectives:[
+    'Distinguish self-limited viral illness from bacterial infection by history and exam.',
+    'Screen for the red flags that would change management.',
+    'Practice antimicrobial stewardship — and avoid a penicillin-allergy medication error.',
+    'Communicate a "no antibiotic" plan with empathy and shared decision-making.',
+    'Give symptomatic care, clear return precautions, and a safety net for travel.',
+  ],
+  guidelines:[
+    {name:'Be Antibiotics Aware / Adult Acute Respiratory Tract Infection guidance', body:'CDC (with ACP)', date:'2016, reaffirmed in current CDC materials', note:'Uncomplicated viral URIs do not warrant antibiotics; reserve for defined bacterial criteria.'},
+    {name:'Clinical Practice Guideline for Acute Bacterial Rhinosinusitis in Adults', body:'IDSA', date:'2012', note:'Treat only with persistent symptoms ≥10 days, severe onset, or "double-sickening" (worsening after initial improvement).'},
+  ],
+  behaviors:['Pressure and frustration ("I need a Z-pack before I fly Friday")','A fixed belief ("it always turns into a sinus infection")','A documented penicillin allergy that turns the wrong prescription into a real safety event'],
+  actions:{
+    chart:[
+      act('c3_chart','Review problem list, medications, and allergies on file','Healthy; on an oral contraceptive. PENICILLIN ALLERGY (hives) documented. No chronic lung disease.',1,{hx:1,ms:1},{c:true}),
+      act('c3_chart_old','Read through years of unrelated old visits','Not relevant; time you do not have in a 15-minute slot.',2,{},{lv:true}),
+    ],
+    identity:[ act('c3_id','Verify identity','Identity confirmed.',1,{sf:1},{c:true}) ],
+    agenda:[
+      act('c3_open','Elicit her concerns and expectations','"Four days of congestion, sore throat, and a cough. It always turns into a sinus infection for me — I need a Z-pack before I fly Friday."',1,{co:2,hx:1},{c:true}),
+    ],
+    hpi:[
+      act('c3_course','Clarify the timeline and trajectory (worsening vs. improving; any "double-sickening")','Started four days ago, peaked around day two, and is slowly improving overall. No second worsening; no fevers after day one.',1,{hx:2,rz:2},{c:true}),
+      act('c3_features','Ask about bacterial-suggestive features (severe unilateral facial pain, focal purulence, high persistent fever)','Mild, diffuse, bilateral facial pressure; no severe unilateral pain; no persistent high fever.',1,{hx:1,rz:1},{c:true}),
+      act('c3_redflags','Red-flag screen: dyspnea, chest pain, trouble swallowing/drooling, neck stiffness, dehydration','None — eating and drinking normally, no shortness of breath, no drooling, no neck stiffness.',1,{sf:4},{c:true}),
+    ],
+    meds:[
+      act('c3_medrec','Reconcile medications (oral contraceptive) and consider interactions','Oral contraceptive; no other medications.',1,{hx:1,ms:1}),
+    ],
+    allergies:[
+      act('c3_allergy','Verify the allergy and reaction before considering any antibiotic','Penicillin — hives. Has tolerated azithromycin in the past.',1,{ms:3},{c:true}),
+    ],
+    history:[
+      act('c3_sh','Brief social / exposure history and travel plans','Non-smoker; flying Friday for a family event; worried about being sick on the trip.',1,{hx:1}),
+    ],
+    ros:[
+      act('c3_ros','Focused ENT / respiratory ROS','Postnasal drip and mild ear fullness; no wheeze by history.',1,{hx:1}),
+    ],
+    vitals:[
+      act('c3_vitals','Review and interpret vitals','T 37.4°C, HR 78, RR 14, SpO2 99%, BP 118/72 — reassuring.',1,{sf:2,dg:1},{c:true}),
+    ],
+    exam:[
+      act('c3_exam_ent','HEENT and neck exam','Mild pharyngeal erythema, no exudate, no anterior cervical nodes (low Centor); tympanic membranes normal; sinuses mildly tender bilaterally; no facial swelling.',2,{rz:2,dg:1},{c:true}),
+      act('c3_exam_lung','Auscultate the lungs','Clear bilaterally, no crackles or wheeze — reassuring against pneumonia.',1,{sf:2,dg:1},{c:true}),
+      act('c3_exam_full','Perform a complete head-to-toe exam','Thorough but unnecessary for this focused complaint; spends the short slot.',3,{},{lv:true}),
+    ],
+    orders:[
+      act('c3_none','Decide no labs or imaging are indicated and document that reasoning','Correct: an uncomplicated viral URI needs no testing.',1,{dg:3,mg:1},{c:true}),
+      act('c3_strep','Send a rapid strep test','Low pre-test probability (low Centor) — low yield here.',1,{},{lv:true}),
+      act('c3_cxr','Order a chest X-ray','No indication with clear lungs and normal vitals.',1,{},{lv:true}),
+      act('c3_ct','Order a sinus CT','Not indicated for early, improving symptoms.',1,{},{lv:true}),
+      act('c3_cbc','Order a CBC and metabolic panel','No indication; adds cost and time.',1,{},{lv:true}),
+    ],
+    problem:[
+      act('c3_pr_a','Healthy 34-year-old with four days of improving, self-limited viral upper-respiratory infection; no bacterial features or red flags; requesting antibiotics.','Accurate and stewardship-anchored.',0,{rz:3},{c:true}),
+      act('c3_pr_b','Acute bacterial sinusitis requiring antibiotics.','Not supported by the short, improving course.',0,{}),
+      act('c3_pr_c','Possible pneumonia.','Not supported by clear lungs and normal vitals.',0,{}),
+    ],
+    ddx:[
+      act('c3_ddx_viral','Viral upper-respiratory infection / common cold','The correct leading diagnosis.',0,{rz:3},{c:true}),
+      act('c3_ddx_sinus','Acute bacterial rhinosinusitis (less likely — <10 days and improving)','Reasonable to name and exclude.',0,{rz:1}),
+      act('c3_ddx_strep','Strep pharyngitis (low probability)','Reasonable to consider and set aside.',0,{rz:1}),
+      act('c3_ddx_flu','Influenza / COVID-19 (worth considering seasonally)','Reasonable to consider.',0,{rz:1}),
+    ],
+    redflags:[
+      act('c3_rf_none','No red flags present — safe for outpatient symptomatic care','Correct assessment after your screen and exam.',0,{sf:3},{c:true}),
+    ],
+    diagnosis:[
+      act('c3_dx_viral','Viral upper-respiratory infection','Correct.',0,{rz:2},{c:true}),
+      act('c3_dx_bact','Bacterial sinusitis','Not supported.',0,{}),
+    ],
+    management:[
+      act('c3_mg_sympt','Symptomatic care: analgesia/antipyretics, hydration, saline/nasal measures, rest','The evidence-based core of treatment.',1,{mg:3},{c:true}),
+      act('c3_mg_noabx','Do not prescribe antibiotics; explain the evidence','Correct stewardship decision.',1,{mg:3,sf:1},{c:true}),
+      act('c3_mg_delayed','Offer a delayed / "safety-net" prescription with clear use-criteria (shared decision)','A reasonable middle path that reduces immediate antibiotic use.',1,{mg:2,co:1}),
+      act('c3_mg_azithro','Prescribe azithromycin (the requested Z-pack)','Not indicated — a stewardship failure with side-effect and QT risk for no benefit.',1,{mg:-4,ms:-2},{lv:true,err:true}),
+      act('c3_mg_amox','Prescribe amoxicillin or amoxicillin-clavulanate','A penicillin in a penicillin-allergic patient — a serious medication error.',1,{ms:-6,mg:-2},{lv:true,err:true}),
+    ],
+    education:[
+      act('c3_edu_empathy','Validate her concern and explain viral vs. bacterial in plain, non-dismissive language','Empathy is what makes the "no antibiotic" plan land.',1,{co:3},{c:true}),
+      act('c3_edu_expect','Set expectations: typical course of 7–10+ days, lingering cough; why antibiotics will not help and can harm (side effects, resistance)','Reframes the request with education.',1,{co:2,mg:1},{c:true}),
+      act('c3_edu_trip','Address the trip specifically: what to do if she worsens while traveling','Meets her real-world worry.',1,{co:1,dp:1}),
+    ],
+    disposition:[
+      act('c3_disp_home','Discharge home with symptomatic care and a safety net','The correct disposition.',0,{dp:2},{c:true}),
+      act('c3_disp_appease','Prescribe antibiotics just to satisfy the request','Appeasement prescribing — the failure mode this case targets.',0,{mg:-3}),
+      act('c3_disp_ed','Send her to the emergency department','Over-triage for a stable viral illness.',0,{}),
+    ],
+    followup:[
+      act('c3_fu_prn','Return or use telehealth if not improving by 7–10 days, if worsening, or if symptoms improve then worsen ("double-sickening")','The correct, criteria-based safety net.',0,{dp:2},{c:true}),
+      act('c3_fu_2d','Schedule a routine recheck in two days','Low-value for an improving viral illness.',0,{}),
+    ],
+    precautions:[
+      act('c3_rp_bact','Return precautions: symptoms beyond 10 days, worsening after improvement, high fever, or focal severe ear/face pain','Ties directly to the bacterial-sinusitis criteria.',1,{sf:2,dp:1},{c:true}),
+      act('c3_rp_emerg','Emergency precautions: shortness of breath, chest pain, trouble swallowing or breathing, dehydration','Covers the dangerous escalations.',1,{sf:2,dp:1},{c:true}),
+    ],
+    documentation:[
+      act('c3_doc_reason','Document why antibiotics were not indicated (the shared decision and stewardship rationale)','Supports the decision and future visits.',1,{doc:3},{c:true}),
+      act('c3_doc_exam','Document the pertinent negatives (clear lungs, no red flags, low Centor)','Makes the reasoning legible.',1,{doc:2},{c:true}),
+    ],
+  },
+  safety:[
+    {when:'selected', id:'c3_mg_amox', cap:50, risk:'Prescribing a penicillin to a patient with a documented penicillin allergy (hives) risks a serious allergic reaction, including anaphylaxis — a preventable medication-safety error.'},
+  ],
+  walkthrough:'The clinical work here is quick; the hard part is the conversation. A four-day, improving course that peaked on day two, with no double-sickening, no severe unilateral facial pain, and no persistent high fever, plus clear lungs and reassuring vitals, is a viral URI — no testing and no antibiotics indicated by CDC/IDSA criteria. The safety layer is the documented penicillin allergy: caving to the antibiotic request with amoxicillin would be a genuine medication error, and even a "harmless" Z-pack is a stewardship failure with real side-effect and QT risk. The winning approach validates her worry, explains viral versus bacterial in plain language, sets expectations for the natural course, offers symptomatic care (and optionally a delayed prescription), and gives criteria-based return precautions tailored to her trip.',
+  lessons:[
+    'Saying no to antibiotics succeeds on empathy and explanation, not on being right.',
+    'Choosing not to test or treat is an active, documentable clinical decision — not doing nothing.',
+    'Always re-check the allergy before you reach for a prescription, even under pressure.'
+  ],
+  nextgoal:'On your next case, verify allergies and reactions before you open the order panel, so a pressured moment can never produce an allergy error.'
+};
+
+const CASES = [CASE1, CASE2, CASE3];
+const CASEMAP = Object.fromEntries(CASES.map(c=>[c.id,c]));
+
+/* ---- flatten helpers ---- */
+function allActions(cs){ const out=[]; for(const p of PANELS){ (cs.actions[p.k]||[]).forEach(a=>out.push(Object.assign({panel:p.k},a))); } return out; }
+function actionById(cs,id){ return allActions(cs).find(a=>a.id===id); }
+
+/* ============================================================
+   PERSISTENCE
+   Auto-kept in THIS browser via localStorage (honest: it is not
+   a file). Save/Load exports/imports a portable JSON file so you
+   can back up or move devices — never claimed as automatic file save.
+   ============================================================ */
+const LSKEY='clinicready.v1';
+let STATE = loadLocal() || {
+  version:1,
+  safetyAccepted:false,
+  approved:{},      // caseId -> true
+  history:[],       // {caseId,title,mode,timed,score,domains,minutes,date}
+};
+function loadLocal(){ try{ const s=localStorage.getItem(LSKEY); return s?JSON.parse(s):null; }catch(e){ return null; } }
+function saveLocal(){ try{ localStorage.setItem(LSKEY, JSON.stringify(STATE)); }catch(e){} }
+
+/* transient per-encounter session (not persisted) */
+let SESSION = null;
+
+/* ---- router ---- */
+function go(screen){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(screen).classList.add('active');
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active', b.dataset.nav===screen));
+  window.scrollTo(0,0);
+  if(screen==='dashboard') renderDashboard();
+  if(screen==='start')     renderStart();
+  if(screen==='library')   renderLibrary();
+  if(screen==='settings')  renderSettings();
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ---- safety modal ---- */
+function acceptSafety(){ STATE.safetyAccepted=true; saveLocal(); document.getElementById('safetyModal').classList.remove('show'); }
+function maybeShowSafety(){ if(!STATE.safetyAccepted) document.getElementById('safetyModal').classList.add('show'); }
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+function renderDashboard(){
+  const h = STATE.history;
+  const last = h.slice(-6).reverse();
+  const approvedCount = Object.keys(STATE.approved).filter(k=>STATE.approved[k]).length;
+  const recentRows = last.length ? last.map(r=>`
+      <div class="kv"><span class="k">${esc(new Date(r.date).toLocaleString())} · ${esc(CASEMAP[r.caseId]?CASEMAP[r.caseId].title:r.title)}
+        <span class="tag mode">${esc(r.mode)}${r.timed?' · timed':''}</span></span>
+        <span><b>${r.score}</b>/100</span></div>`).join('')
+    : `<p class="muted small">No encounters yet. Head to <a href="#" onclick="go('start');return false">Start Simulation</a>.</p>`;
+  document.getElementById('dashboard').innerHTML = `
+    <div class="banner"><span class="i">⚠︎</span><div><b>Synthetic patients only.</b> This is a professional training simulator, not clinical care. Do not enter real patient information anywhere.</div></div>
+    <div class="card" style="margin-top:16px">
+      <h1>Welcome back, doctor.</h1>
+      <p class="muted">Rehearse complete outpatient encounters — intake through follow-up — with objective, inspectable scoring. This is <b>Phase 1</b>: the core encounter loop, three deeply built cases, two practice modes, full scoring and after-action report, and save/load.</p>
+      <div class="opt-row" style="margin-top:12px">
+        <button onclick="go('start')">Start a simulation</button>
+        <button class="ghost" onclick="go('library')">Case Library &amp; review</button>
+      </div>
+    </div>
+    <div class="grid g3" style="margin-top:16px">
+      <div class="card"><h3>Cases built</h3><p style="font-size:1.8rem;font-weight:700;margin:0">${CASES.length}</p><p class="muted small">${approvedCount} approved by you · ${CASES.length-approvedCount} awaiting review</p></div>
+      <div class="card"><h3>Encounters completed</h3><p style="font-size:1.8rem;font-weight:700;margin:0">${h.length}</p><p class="muted small">Best score: ${h.length?Math.max(...h.map(r=>r.score)):'—'}${h.length?'/100':''}</p></div>
+      <div class="card"><h3>Modes</h3><p class="small" style="margin:0">Guided Practice · Independent Encounter · Timed toggle. A full performance dashboard and Clinic-Readiness score arrive in Phase 2.</p></div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>Recent encounters</h3>
+      ${recentRows}
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>How approval works</h3>
+      <p class="small muted">Every case ships marked <span class="tag draft">Draft</span>. Open it in the Case Library to read its full contents, learning objectives, guideline sources with dates, and the expert walk-through, then mark it <span class="tag appr">Approved</span> once you have verified the clinical content. You can run drafts to practice; the encounter and report will show a Draft ribbon until you approve.</p>
+    </div>`;
+}
+
+/* ============================================================
+   START SIMULATION
+   ============================================================ */
+let startPick = { caseId:CASES[0].id, mode:'guided', timed:false };
+function renderStart(){
+  const caseCards = CASES.map(c=>{
+    const appr = STATE.approved[c.id];
+    return `<div class="opt ${startPick.caseId===c.id?'sel':''}" onclick="pickCase('${c.id}')">
+      <b>${esc(c.title)}</b>
+      <span class="small muted">${esc(c.who.name)} · ${c.who.age}${esc(c.who.sex[0])} · ${c.slot}-min slot</span><br>
+      <span class="tag ${appr?'appr':'draft'}">${appr?'Approved':'Draft'}</span>
+      <span class="tag mode">${esc(c.category)}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('start').innerHTML = `
+    <h1>Start a simulation</h1>
+    <div class="card">
+      <h3>1 · Choose a case</h3>
+      <div class="opt-row">${caseCards}</div>
+    </div>
+    <div class="card">
+      <h3>2 · Choose a mode</h3>
+      <div class="opt-row">
+        <div class="opt ${startPick.mode==='guided'?'sel':''}" onclick="pickMode('guided')"><b>Guided Practice</b><span class="small muted">Objectives, a live critical-actions checklist, and per-panel hints are visible. Your score still stays hidden until you submit.</span></div>
+        <div class="opt ${startPick.mode==='independent'?'sel':''}" onclick="pickMode('independent')"><b>Independent Encounter</b><span class="small muted">No hints, no checklist, no objectives. Just you, the patient, and the clock until you submit.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>3 · Timing</h3>
+      <div class="toggle ${startPick.timed?'on':''}" onclick="toggleTimed()"><span class="switch"></span><span><b>Timed</b> — exceeding the appointment slot costs points (up to −10). The visit timer runs in both modes; Timed makes overrun count.</span></div>
+      <p class="small muted" style="margin-top:10px">Time is modeled by what each action realistically costs in minutes, so thoroughness that ignores the clock is penalized the way it is in a real clinic.</p>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:6px">
+      <button onclick="beginEncounter()">Begin encounter →</button>
+      <button class="ghost" onclick="go('dashboard')">Cancel</button>
+    </div>`;
+}
+function pickCase(id){ startPick.caseId=id; renderStart(); }
+function pickMode(m){ startPick.mode=m; renderStart(); }
+function toggleTimed(){ startPick.timed=!startPick.timed; renderStart(); }
+
+/* ============================================================
+   ENCOUNTER
+   ============================================================ */
+function beginEncounter(){
+  const cs = CASEMAP[startPick.caseId];
+  SESSION = {
+    caseId:cs.id, mode:startPick.mode, timed:startPick.timed,
+    taken:new Set(), reveals:[], curPanel:PANELS.find(p=>(cs.actions[p.k]||[]).length).k,
+    startedWall:Date.now()
+  };
+  renderEncounter();
+  go('encounter');
+}
+function minutesUsed(){ const cs=CASEMAP[SESSION.caseId]; let m=0; SESSION.taken.forEach(id=>{const a=actionById(cs,id); if(a) m+=a.m;}); return m; }
+function panelCount(cs,pk){ return (cs.actions[pk]||[]).filter(a=>SESSION.taken.has(a.id)).length; }
+
+function renderEncounter(){
+  const cs = CASEMAP[SESSION.caseId];
+  const guided = SESSION.mode==='guided';
+  const used = minutesUsed();
+  const over = used - cs.slot;
+  const draftRibbon = !STATE.approved[cs.id] ? `<span class="tag draft" title="Not yet clinically approved by you">Draft</span>` : `<span class="tag appr">Approved</span>`;
+
+  const nav = PANELS.filter(p=>(cs.actions[p.k]||[]).length).map(p=>{
+    const n = panelCount(cs,p.k);
+    return `<button class="${SESSION.curPanel===p.k?'active':''}" onclick="selPanel('${p.k}')">
+      <span>${esc(p.t)}</span><span class="cnt ${n?'':'zero'}">${n}</span></button>`;
+  }).join('');
+
+  const p = PMETA[SESSION.curPanel];
+  const acts = (cs.actions[SESSION.curPanel]||[]);
+  const hint = guided && p.hint ? `<div class="hintbox">💡 ${esc(p.hint)}</div>` : '';
+  const singleNote = p.single ? `<p class="small muted">Choose one.</p>` : (p.multi ? `<p class="small muted">Select all that apply.</p>` : '');
+  const actHtml = acts.map(a=>{
+    const taken = SESSION.taken.has(a.id);
+    const errCls = a.err ? 'err':'';
+    return `<div class="action ${taken?'taken':''} ${errCls}" onclick="toggleAction('${a.id}')">
+      <div class="lbl"><span>${esc(a.t)}</span>${a.m?`<span class="min">${a.m} min</span>`:''}</div>
+      ${taken?`<div class="reveal">${esc(a.r)}</div>`:''}
+    </div>`;
+  }).join('');
+
+  // right rail
+  const transcript = SESSION.reveals.length ? SESSION.reveals.map(x=>`<div class="tline"><span class="a">${esc(x.a)}</span><br><span class="r">${esc(x.r)}</span></div>`).join('') : `<p class="muted small">Your actions and the patient’s responses will appear here.</p>`;
+  let guideBlock = '';
+  if(guided){
+    const crit = allActions(cs).filter(a=>a.c);
+    const critHtml = crit.map(a=>`<li class="${SESSION.taken.has(a.id)?'done':''}">${esc(a.t)}</li>`).join('');
+    guideBlock = `<div class="card"><h4>Learning objectives</h4><ul class="small" style="margin:.2em 0 .6em;padding-left:1.1em">${cs.objectives.map(o=>`<li>${esc(o)}</li>`).join('')}</ul>
+      <h4>Critical actions (${crit.filter(a=>SESSION.taken.has(a.id)).length}/${crit.length})</h4>
+      <ul class="checklist">${critHtml}</ul></div>`;
+  }
+
+  document.getElementById('encounter').innerHTML = `
+    <div class="enc-head">
+      <div class="who"><b>${esc(cs.who.name)}</b> · ${cs.who.age}${esc(cs.who.sex[0])} · <span class="muted">${esc(cs.reason)}</span> ${draftRibbon} <span class="tag mode">${guided?'Guided':'Independent'}${SESSION.timed?' · Timed':''}</span></div>
+      <div class="timer">
+        <div class="small muted">Visit time used</div>
+        <div class="big ${SESSION.timed&&over>0?'over':''}">${used} / ${cs.slot} min ${over>0?`(+${over} over)`:''}</div>
+      </div>
+      <button onclick="confirmSubmit()">Submit encounter</button>
+    </div>
+    <div class="enc-grid">
+      <div class="panelnav">${nav}</div>
+      <div class="stage">
+        <h3>${esc(p.t)}</h3>
+        ${hint}${singleNote}
+        ${actHtml || '<p class="muted">No items in this panel for this case.</p>'}
+      </div>
+      <div class="rail">
+        <div class="card"><h4>Encounter log</h4><div class="transcript">${transcript}</div></div>
+        ${guideBlock}
+        <div class="card"><button class="ghost sm" onclick="go('start')">Abandon encounter</button></div>
+      </div>
+    </div>`;
+}
+function selPanel(pk){ SESSION.curPanel=pk; renderEncounter(); }
+function toggleAction(id){
+  const cs=CASEMAP[SESSION.caseId];
+  const a=actionById(cs,id);
+  const p=PMETA[a.panel];
+  if(SESSION.taken.has(id)){
+    SESSION.taken.delete(id);
+    SESSION.reveals = SESSION.reveals.filter(x=>x.id!==id);
+  } else {
+    if(p.single){ // deselect siblings
+      (cs.actions[p.k]||[]).forEach(sib=>{ if(SESSION.taken.has(sib.id)){ SESSION.taken.delete(sib.id); SESSION.reveals=SESSION.reveals.filter(x=>x.id!==sib.id); } });
+    }
+    SESSION.taken.add(id);
+    SESSION.reveals.push({id, a:a.t, r:a.r});
+  }
+  renderEncounter();
+}
+function confirmSubmit(){
+  const cs=CASEMAP[SESSION.caseId];
+  if(SESSION.taken.size < 3){ if(!confirm('You have taken very few actions. Submit anyway?')) return; }
+  const res = scoreEncounter(cs, SESSION);
+  STATE.history.push({caseId:cs.id, title:cs.title, mode:SESSION.mode, timed:SESSION.timed, score:res.total, domains:res.domains, minutes:res.minutes, date:Date.now()});
+  saveLocal();
+  renderReport(cs, SESSION, res);
+  go('report');
+}
+
+/* ============================================================
+   SCORING ENGINE
+   ============================================================ */
+function scoreEncounter(cs, sess){
+  const taken = sess.taken;
+  const acts = allActions(cs);
+
+  // per-domain contributions actually earned (from taken actions)
+  const contrib = {}; DOMAINS.forEach(d=>contrib[d.k]=[]);
+  acts.forEach(a=>{
+    if(!taken.has(a.id)) return;
+    for(const dk in a.a){ if(a.a[dk]!==0) contrib[dk].push({label:a.t, pts:a.a[dk], id:a.id}); }
+  });
+  const missedCrit = acts.filter(a=>a.c && !taken.has(a.id));
+
+  // How many positive points are ACHIEVABLE in each domain for THIS case?
+  // Single-select panels count only their best option (you can pick one);
+  // everything else sums the positive awards. This lets a flawless encounter
+  // score ~100 even when a case naturally stresses only some domains, while
+  // each domain keeps its fixed weight/importance in the overall grade.
+  const achievable = {}; DOMAINS.forEach(d=>achievable[d.k]=0);
+  PANELS.forEach(p=>{
+    const list = cs.actions[p.k]||[];
+    if(p.single){
+      DOMAINS.forEach(d=>{ achievable[d.k] += Math.max(0, ...list.map(a=>a.a[d.k]||0), 0); });
+    } else {
+      list.forEach(a=>{ for(const dk in a.a){ if(a.a[dk]>0) achievable[dk]+=a.a[dk]; } });
+    }
+  });
+
+  // Earned per domain (includes negatives from errors), clamped to [0, achievable].
+  const rawEarned={}, earned={};
+  DOMAINS.forEach(d=>{
+    rawEarned[d.k] = contrib[d.k].reduce((s,c)=>s+c.pts,0);
+    earned[d.k] = Math.max(0, Math.min(achievable[d.k], rawEarned[d.k]));
+  });
+
+  // Weighted, normalized base out of 100 over the domains this case exercises.
+  let wSum=0, wEarn=0;
+  const domains={};
+  DOMAINS.forEach(d=>{
+    const ratio = achievable[d.k]>0 ? earned[d.k]/achievable[d.k] : null;
+    domains[d.k] = {earned:earned[d.k], achievable:achievable[d.k], weight:d.max, ratio};
+    if(achievable[d.k]>0){ wSum+=d.max; wEarn+=d.max*ratio; }
+  });
+  let base = wSum>0 ? (100*wEarn/wSum) : 0;
+
+  // efficiency / time penalty (absolute points on the 100 scale)
+  const minutes = acts.filter(a=>taken.has(a.id)).reduce((s,a)=>s+a.m,0);
+  const over = Math.max(0, minutes - cs.slot);
+  let timePenalty = 0;
+  if(sess.timed && over>0){ timePenalty = Math.min(10, Math.ceil(over/2)); }
+
+  // critical safety caps
+  const triggered = [];
+  (cs.safety||[]).forEach(rule=>{
+    const hit = rule.when==='selected' ? taken.has(rule.id) : !taken.has(rule.id);
+    if(hit) triggered.push(rule);
+  });
+  const cap = triggered.length ? Math.min(...triggered.map(r=>r.cap)) : 100;
+
+  let total = base - timePenalty;
+  const cappedByRule = total > cap;
+  total = Math.min(total, cap);
+  total = Math.max(0, Math.round(total));
+
+  const lowValueTaken = acts.filter(a=>a.lv && taken.has(a.id));
+  const errorsTaken   = acts.filter(a=>a.err && taken.has(a.id));
+  const highValueMissed = acts.filter(a=>a.c && !taken.has(a.id) && ['hpi','ros','exam','orders','meds','allergies','preventive','agenda'].includes(a.panel));
+
+  const ddx = cs.actions.ddx||[];
+  const ddxCorrect = ddx.filter(a=>a.c && taken.has(a.id));
+  const ddxMissedCritical = ddx.filter(a=>a.c && !taken.has(a.id));
+  const ddxReasonableChosen = ddx.filter(a=>!a.c && (a.a.rz>0) && taken.has(a.id));
+  const ddxAnchors = ddx.filter(a=>!a.c && !(a.a.rz>0) && taken.has(a.id));
+
+  return {total, base:Math.round(base), domains, contrib, missedCrit, minutes, over, timePenalty, triggered, cap, cappedByRule,
+    lowValueTaken, errorsTaken, highValueMissed, ddxCorrect, ddxMissedCritical, ddxReasonableChosen, ddxAnchors};
+}
+
+/* ============================================================
+   AFTER-ACTION REPORT
+   ============================================================ */
+function renderReport(cs, sess, res){
+  const guided = sess.mode==='guided';
+  const critAll = allActions(cs).filter(a=>a.c);
+  const critDone = critAll.filter(a=>sess.taken.has(a.id));
+  const critMiss = critAll.filter(a=>!sess.taken.has(a.id));
+
+  const domHtml = DOMAINS.map(d=>{
+    const dm=res.domains[d.k];
+    const notInCase = dm.achievable<=0;
+    const pct = notInCase?0:Math.round(dm.ratio*100);
+    const pos=res.contrib[d.k].filter(c=>c.pts>0);
+    const neg=res.contrib[d.k].filter(c=>c.pts<0);
+    const missed=res.missedCrit.filter(a=>(a.a[d.k]||0)>0);
+    const rows = notInCase ? `<p class="small muted">This domain is not exercised by this case, so it does not affect the score.</p>` : ([
+      ...pos.map(c=>`<div class="contrib"><span>${esc(c.label)}</span><span class="p pos">+${c.pts}</span></div>`),
+      ...neg.map(c=>`<div class="contrib"><span>${esc(c.label)} (error)</span><span class="p neg">${c.pts}</span></div>`),
+      ...missed.map(a=>`<div class="contrib"><span>Missed: ${esc(a.t)}</span><span class="p miss">−${a.a[d.k]} forgone</span></div>`)
+    ].join('') || `<p class="small muted">No points earned or lost here.</p>`);
+    const right = notInCase ? `<span class="muted">n/a</span>` : `${dm.earned}/${dm.achievable} pts · ${pct}%`;
+    return `<details class="pt">
+      <summary><div class="dom"><div class="top"><span>${esc(d.t)} <span class="muted small">(weight ${d.max})</span></span><span>${right}</span></div><div class="bar"><i style="width:${pct}%"></i></div></div></summary>
+      <div class="body">${rows}</div></details>`;
+  }).join('');
+
+  const capBlock = res.triggered.length ? `
+    <div class="card" style="border-color:#f3cfcf;background:#fdf6f5">
+      <h3 style="color:#8a2f26">⚠ Critical safety issue — score capped at ${res.cap}</h3>
+      ${res.triggered.map(t=>`<div class="flagrow miss"><b>Why this matters:</b> ${esc(t.risk)}</div>`).join('')}
+      <p class="small muted" style="margin-top:8px">This cap is here to make an unsafe pattern impossible to overlook — not to shame. Replay the case and see how the safe path scores.</p>
+    </div>` : '';
+
+  const critList = (arr,cls)=> arr.length? arr.map(a=>`<div class="flagrow ${cls}">${esc(a.t)}</div>`).join('') : `<p class="small muted">None.</p>`;
+
+  const effClass = res.over>0 ? (sess.timed?'low':'low') : 'good';
+  const effMsg = res.over>0
+    ? `You used <b>${res.minutes} min</b> against a ${cs.slot}-min slot (<b>${res.over} over</b>).${sess.timed?` Timed penalty: <b>−${res.timePenalty}</b>.`:' Timed mode was off, so no point penalty — but this would run you behind in a real clinic.'}`
+    : `You used <b>${res.minutes} min</b> of the ${cs.slot}-min slot — efficient.`;
+
+  const ddxMsg = `
+    <p class="small">Included the must-not-miss diagnosis: ${res.ddxMissedCritical.length? '<b style="color:#c0392b">No</b> — '+res.ddxMissedCritical.map(a=>esc(a.t)).join(', ') : '<b style="color:#1f9d55">Yes</b>'}.
+    Reasonable alternatives considered: ${res.ddxReasonableChosen.length? res.ddxReasonableChosen.map(a=>esc(a.t)).join(', ') : '—'}.
+    ${res.ddxAnchors.length? 'Anchoring choices selected: '+res.ddxAnchors.map(a=>esc(a.t)).join(', ')+'.' : ''}</p>`;
+
+  const guideHtml = cs.guidelines.map(g=>`<div class="src"><b>${esc(g.name)}</b> — ${esc(g.body)} <span class="muted">(${esc(g.date)})</span><br><span class="small muted">${esc(g.note)}</span></div>`).join('');
+
+  const medSafety = res.errorsTaken.filter(a=>a.panel==='management' || a.panel==='orders');
+  const medMsg = medSafety.length
+    ? medSafety.map(a=>`<div class="flagrow miss">${esc(a.t)} — ${a.a.ms<0?'medication-safety deduction':'flagged'} ${Object.entries(a.a).filter(([k,v])=>v<0).map(([k,v])=>`(${DNAME[k]}: ${v})`).join(' ')}</div>`).join('')
+    : `<div class="flagrow good">No medication-safety errors — allergies respected and no unsafe prescriptions.</div>`;
+
+  document.getElementById('report').innerHTML = `
+    <div class="card">
+      <div class="score-hero">
+        <div class="ring" style="--v:${res.total}"><div class="in"><div><b>${res.total}</b><div class="small muted">/ 100</div></div></div></div>
+        <div>
+          <h1 style="margin-bottom:.1em">After-action report</h1>
+          <p class="muted" style="margin:0">${esc(cs.title)} · ${sess.mode==='guided'?'Guided':'Independent'}${sess.timed?' · Timed':''} ${STATE.approved[cs.id]?'<span class="tag appr">Approved</span>':'<span class="tag draft">Draft</span>'}</p>
+          <div class="badge-list" style="margin-top:8px">
+            <span class="pill">Critical actions ${critDone.length}/${critAll.length}</span>
+            <span class="pill">Time ${res.minutes}/${cs.slot} min</span>
+            ${res.triggered.length?`<span class="pill" style="background:#fdeeee;color:#8a2f26">Safety cap ${res.cap}</span>`:''}
+          </div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:8px;flex-direction:column">
+          <button onclick="replay('${cs.id}')">↻ Replay this case</button>
+          <button class="ghost" onclick="go('start')">New simulation</button>
+          <button class="ghost" onclick="openReview('${cs.id}')">Review case &amp; sources</button>
+        </div>
+      </div>
+    </div>
+
+    ${capBlock}
+
+    <div class="grid g2">
+      <div class="card"><h3>Score by domain</h3><p class="small muted">Expand any domain to see exactly where each point was earned, lost, or forgone.</p>${domHtml}</div>
+      <div>
+        <div class="card"><h3>Critical actions</h3>
+          <h4 style="margin-top:.6em">Completed</h4>${critList(critDone,'good')}
+          <h4 style="margin-top:.8em">Missed</h4>${critList(critMiss,'miss')}
+        </div>
+        <div class="card"><h3>Efficiency</h3><div class="flagrow ${effClass}">${effMsg}</div>
+          <h4 style="margin-top:.6em">Low-value actions you took</h4>${res.lowValueTaken.length?res.lowValueTaken.map(a=>`<div class="flagrow low">${esc(a.t)} — ${a.m} min spent for little clinical yield.</div>`).join(''):'<p class="small muted">None — you stayed on high-value actions.</p>'}
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card"><h3>Clinical reasoning &amp; differential</h3>${ddxMsg}</div>
+      <div class="card"><h3>Medication safety</h3>${medMsg}</div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card"><h3>High-value history/exam you omitted</h3>${res.highValueMissed.length?res.highValueMissed.map(a=>`<div class="flagrow low">${esc(a.t)}</div>`).join(''):'<div class="flagrow good">You gathered the high-value information for this case.</div>'}</div>
+      <div class="card"><h3>Guideline sources</h3><p class="small muted">Verify against the current version before relying on any case.</p>${guideHtml}</div>
+    </div>
+
+    <div class="card"><h3>Expert walk-through of the ideal encounter</h3><div class="walk">${esc(cs.walkthrough)}</div></div>
+
+    <div class="grid g2">
+      <div class="card"><h3>Three key lessons</h3><ol class="lessons">${cs.lessons.map(l=>`<li>${esc(l)}</li>`).join('')}</ol></div>
+      <div class="card"><h3>One goal for your next case</h3><p>${esc(cs.nextgoal)}</p>
+        <div style="margin-top:10px;display:flex;gap:8px"><button onclick="replay('${cs.id}')">↻ Replay with the same case</button></div>
+        <p class="small muted" style="margin-top:8px">Replay Note: in Phase 3, replays will alter case details so the answer can’t be memorized. For now, replaying lets you rehearse the same workflow to mastery.</p>
+      </div>
+    </div>`;
+}
+function replay(id){ startPick.caseId=id; startPick.mode=SESSION?SESSION.mode:'guided'; startPick.timed=SESSION?SESSION.timed:false; beginEncounter(); }
+
+/* ============================================================
+   CASE LIBRARY + REVIEW / APPROVE
+   ============================================================ */
+function renderLibrary(){
+  const cards = CASES.map(c=>{
+    const appr=STATE.approved[c.id];
+    return `<div class="card libcard" onclick="openReview('${c.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <h3 style="margin:0">${esc(c.title)}</h3>
+        <span class="tag ${appr?'appr':'draft'}">${appr?'Approved':'Draft'}</span>
+      </div>
+      <p class="small muted" style="margin:.3em 0">${esc(c.who.name)} · ${c.who.age}${esc(c.who.sex[0])} · ${c.slot}-min slot · ${esc(c.category)}</p>
+      <p class="small">${esc(c.objectives[0])}</p>
+      <div class="badge-list">${c.guidelines.map(g=>`<span class="tag mode">${esc(g.body)} ${esc(g.date.replace(/\(.*\)/,'').trim())}</span>`).join('')}</div>
+      <button class="sub sm" style="margin-top:8px">Open case review →</button>
+    </div>`;
+  }).join('');
+  document.getElementById('library').innerHTML = `
+    <h1>Case Library</h1>
+    <p class="muted">Read a case’s full clinical content and sources, then mark it Approved. Cases stay <span class="tag draft">Draft</span> until you sign off.</p>
+    <div class="grid g2">${cards}</div>`;
+}
+
+function openReview(id){
+  const cs=CASEMAP[id];
+  const appr=STATE.approved[id];
+  const actAll = allActions(cs);
+  const crit = actAll.filter(a=>a.c);
+  const sectionActions = PANELS.filter(p=>(cs.actions[p.k]||[]).length).map(p=>{
+    const rows=(cs.actions[p.k]).map(a=>`<div class="kv"><span class="k">${esc(a.t)}${a.c?' <span class="tag appr" style="padding:.1em .4em">critical</span>':''}${a.lv?' <span class="tag draft" style="padding:.1em .4em">low-value</span>':''}${a.err?' <span class="tag" style="background:#fdeeee;color:#8a2f26;padding:.1em .4em">error</span>':''}</span><span class="small" style="max-width:52%;text-align:right;color:#20323f">${esc(a.r)}</span></div>`).join('');
+    return `<details class="pt"><summary>${esc(p.t)} <span class="muted small">(${cs.actions[p.k].length})</span></summary><div class="body">${rows}</div></details>`;
+  }).join('');
+
+  document.getElementById('review').innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <button class="ghost sm" onclick="go('library')">← Library</button>
+      <h1 style="margin:0">${esc(cs.title)}</h1>
+      <span class="tag ${appr?'appr':'draft'}">${appr?'Approved':'Draft'}</span>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="kv"><span class="k">Patient (synthetic)</span><span>${esc(cs.who.name)} · ${cs.who.age} · ${esc(cs.who.sex)}</span></div>
+      <div class="kv"><span class="k">Scheduling reason</span><span>${esc(cs.reason)}</span></div>
+      <div class="kv"><span class="k">Appointment slot</span><span>${cs.slot} minutes</span></div>
+      <div class="kv"><span class="k">Category</span><span>${esc(cs.category)}</span></div>
+      <div class="kv"><span class="k">Critical actions defined</span><span>${crit.length}</span></div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card"><h3>Learning objectives</h3><ul>${cs.objectives.map(o=>`<li>${esc(o)}</li>`).join('')}</ul></div>
+      <div class="card"><h3>Authored realistic behaviors</h3><ul>${cs.behaviors.map(b=>`<li>${esc(b)}</li>`).join('')}</ul></div>
+    </div>
+
+    <div class="card"><h3>Guideline sources &amp; dates</h3>
+      <p class="small muted">Guidelines change. Confirm each against the current published version before approving.</p>
+      ${cs.guidelines.map(g=>`<div class="src"><b>${esc(g.name)}</b> — ${esc(g.body)} <span class="muted">(${esc(g.date)})</span><br><span class="small muted">${esc(g.note)}</span></div>`).join('')}
+    </div>
+
+    <div class="card"><h3>Critical safety misses (score caps)</h3>
+      ${(cs.safety||[]).map(s=>`<div class="flagrow miss"><b>${s.when==='selected'?'If chosen':'If omitted'}:</b> ${esc(actionById(cs,s.id)?actionById(cs,s.id).t:s.id)} → caps at ${s.cap}. <br>${esc(s.risk)}</div>`).join('')}
+    </div>
+
+    <div class="card"><h3>Full authored content (every action &amp; response)</h3>
+      <p class="small muted">Nothing here is shown to you during an Independent encounter — it appears only when you take the action. Review it all here.</p>
+      ${sectionActions}
+    </div>
+
+    <div class="card"><h3>Expert walk-through</h3><div class="walk">${esc(cs.walkthrough)}</div>
+      <h4 style="margin-top:12px">Key lessons</h4><ul>${cs.lessons.map(l=>`<li>${esc(l)}</li>`).join('')}</ul>
+    </div>
+
+    <div class="card">
+      <h3>Clinical sign-off</h3>
+      <p class="small muted">Approving records that you, the physician, have reviewed this case’s clinical content and sources. You can revoke approval any time.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        ${appr
+          ? `<button class="danger" onclick="setApproved('${id}',false)">Revoke approval</button>`
+          : `<button onclick="setApproved('${id}',true)">✓ Mark this case Approved</button>`}
+        <button class="ghost" onclick="startFromReview('${id}')">Practice this case →</button>
+      </div>
+    </div>`;
+  go('review');
+}
+function setApproved(id,val){ STATE.approved[id]=val; if(!val) delete STATE.approved[id]; saveLocal(); openReview(id); }
+function startFromReview(id){ startPick.caseId=id; go('start'); }
+
+/* ============================================================
+   SETTINGS + SAVE/LOAD
+   ============================================================ */
+function renderSettings(){
+  document.getElementById('settings').innerHTML = `
+    <h1>Settings</h1>
+    <div class="banner"><span class="i">⚠︎</span><div><b>Standing safety statement.</b> This platform is for professional education and simulation only; it is not a substitute for clinical judgment, institutional policy, or current medical references. Do not enter real patient information.</div></div>
+    <div class="card" style="margin-top:16px">
+      <h3>Progress</h3>
+      <p class="small muted">Your progress is kept automatically in <b>this browser</b> (approvals and encounter history). It is not a file and will not follow you to another device or survive clearing your browser data. Use <b>Save my progress</b> to download a portable backup, and <b>Load progress</b> to restore it here or on another device.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button onclick="saveProgress()">⤓ Save my progress (download file)</button>
+        <label class="ghost" style="display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:.6em 1.05em;background:#fff;cursor:pointer;font-weight:600">⤒ Load progress<input type="file" accept="application/json" style="display:none" onchange="loadProgress(event)"></label>
+        <button class="danger" onclick="resetProgress()">Reset all progress</button>
+      </div>
+      <p class="small muted" id="saveStatus" style="margin-top:8px"></p>
+    </div>
+    <div class="card">
+      <h3>About this build</h3>
+      <p class="small">ClinicReady <b>Phase 1</b>: the core encounter loop, three deeply built and physician-reviewable cases, Guided and Independent modes with a Timed toggle, a full 100-point scoring engine with an inspectable after-action report, save/load, and case approval. Phase 2 (case-authoring template, more cases, protocol drills, performance dashboard, documentation practice) and Phase 3 (follow-up mode, full clinic day, weakness review, red-flag challenge) are planned next.</p>
+    </div>`;
+}
+function saveProgress(){
+  const blob=new Blob([JSON.stringify(STATE,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob); const a=document.createElement('a');
+  a.href=url; a.download='clinicready-progress.json'; a.click(); URL.revokeObjectURL(url);
+  const s=document.getElementById('saveStatus'); if(s) s.textContent='Progress downloaded as clinicready-progress.json';
+}
+function loadProgress(ev){
+  const f=ev.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ const data=JSON.parse(r.result);
+      if(!data || typeof data!=='object' || !('approved' in data) || !('history' in data)) throw new Error('bad');
+      STATE=Object.assign({version:1,safetyAccepted:true,approved:{},history:[]}, data);
+      saveLocal(); const s=document.getElementById('saveStatus'); if(s) s.textContent='Progress loaded successfully.'; renderSettings();
+    }catch(e){ const s=document.getElementById('saveStatus'); if(s) s.textContent='That file could not be read as a ClinicReady progress file.'; }
+  };
+  r.readAsText(f);
+}
+function resetProgress(){ if(!confirm('This clears approvals and encounter history in this browser. Continue?')) return; STATE={version:1,safetyAccepted:true,approved:{},history:[]}; saveLocal(); renderSettings(); }
+
+/* ---- boot ---- */
+renderDashboard();
+maybeShowSafety();
+</script>
+</body>
+</html>
